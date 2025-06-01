@@ -110,6 +110,7 @@
             padding-right: 0; 
             margin-bottom: 20px;
         }
+        /* This rule applies the purple solid circle to main ToC items */
         #slide0_intro .toc-list > li {
             font-size: 1.2rem;
             color: var(--text-dark);
@@ -117,16 +118,17 @@
             border-bottom: 1px solid #e5e7eb; 
             position: relative;
         }
+        /* This is the purple solid circle style for main ToC items */
         #slide0_intro .toc-list > li::before { 
             font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f111'; 
-            font-weight: 900; /* Solid circle */
+            content: '\f111'; /* fa-circle icon */
+            font-weight: 900; /* Solid version of the icon */
             position: absolute;
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.9em; /* Slightly larger */
-            color: var(--primary-color);
+            font-size: 0.9em; 
+            color: var(--primary-color); /* Purple color */
         }
 
         #slide0_intro .toc-list > li:last-child {
@@ -143,16 +145,17 @@
             padding: 6px 25px 6px 0; 
             position: relative;
         }
+         /* This is the blue hollow circle style for sub-ToC items */
          #slide0_intro .toc-list ul li::before { 
             font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f10c'; 
+            content: '\f10c'; /* fa-circle (hollow with font-weight 400) or similar like fa-circle-o from older FA */
             font-weight: 400; 
             position: absolute;
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.8em; /* Slightly larger */
-            color: var(--secondary-color);
+            font-size: 0.8em; 
+            color: var(--secondary-color); /* Blue color */
         }
 
 
@@ -163,7 +166,7 @@
             box-shadow: 0 8px 20px -6px rgba(100, 116, 139, 0.12);
             margin-top: 15px; 
             font-size: 1.1rem; 
-            line-height: 1.9;    
+            line-height: 1.9;   
             color: var(--text-dark);
         }
         .text-shape::before { display: none; } 
@@ -437,7 +440,7 @@
             color: var(--secondary-color);
             top: 6px;
         }
-       
+        
         /* Style for important keywords */
         .important-keyword {
             color: var(--important-keyword-color);
@@ -936,13 +939,14 @@
             if (currentQuiz.questions.length < SECTION_QUIZ_QUESTION_COUNT) {
                 console.warn(`Warning: Not enough questions for section ${sectionNumber} quiz. Found ${currentQuiz.questions.length}, needed ${SECTION_QUIZ_QUESTION_COUNT}`);
                  // If not enough, use what's available
-                if (currentQuiz.questions.length === 0) {
-                    console.error("No questions available for section quiz " + sectionNumber);
-                    alert("خطأ: لا توجد أسئلة كافية لهذا الاختبار المرحلي.");
-                    if (sectionNumber === 1) { currentLessonPart = 2; showSlide('slide8_content_schools_p1');}
-                    else if (sectionNumber === 2) { currentLessonPart = 3; showSlide('slide_assessment_prompt');}
-                    return;
-                }
+                 if (currentQuiz.questions.length === 0) {
+                     console.error("No questions available for section quiz " + sectionNumber);
+                     // Using a custom modal/message box instead of alert
+                     displayModal("خطأ: لا توجد أسئلة كافية لهذا الاختبار المرحلي.");
+                     if (sectionNumber === 1) { currentLessonPart = 2; showSlide('slide8_content_schools_p1');}
+                     else if (sectionNumber === 2) { currentLessonPart = 3; showSlide('slide_assessment_prompt');}
+                     return;
+                 }
             }
             
             const quizSlideId = `slide_quiz_section${sectionNumber}`;
@@ -1057,8 +1061,8 @@
                 feedbackEl = document.getElementById('final_quiz_feedback');
                 nextButtonId = 'final_quiz_next_q_btn';
                 const finalScoreMessage = `<h3>التقويم النهائي مكتمل!</h3>
-                                           <p>نتيجتك: ${currentQuiz.score} من ${currentQuiz.questions.length} (${(scorePercentage * 100).toFixed(0)}%)</p>
-                                           <p>نأمل أن يكون هذا الدرس قد ساعدك على فهم المادة بشكل أفضل.</p>`;
+                                        <p>نتيجتك: ${currentQuiz.score} من ${currentQuiz.questions.length} (${(scorePercentage * 100).toFixed(0)}%)</p>
+                                        <p>نأمل أن يكون هذا الدرس قد ساعدك على فهم المادة بشكل أفضل.</p>`;
                 feedbackEl.innerHTML = finalScoreMessage;
                 feedbackEl.className = 'feedback mt-4 ai-response text-center';
                 applyFeedbackAnimation(feedbackEl);
@@ -1168,9 +1172,10 @@
             if (currentQuiz.questions.length === 0) {
                  currentQuiz.questions = shuffleArray(bankQuestions).slice(0, Math.min(FINAL_ASSESSMENT_QUESTION_COUNT, bankQuestions.length));
                  if(currentQuiz.questions.length === 0) {
-                    alert("لا توجد أسئلة كافية للتقويم النهائي.");
-                    showSlide('slide_final_thanks'); 
-                    return;
+                     // Using a custom modal/message box instead of alert
+                     displayModal("لا توجد أسئلة كافية للتقويم النهائي.");
+                     showSlide('slide_final_thanks'); 
+                     return;
                  }
             }
             
@@ -1179,19 +1184,20 @@
         }
 
         async function getAIFeedback(questionData, userAnswerText, selectedOptionIndex) {
-            const { question, options, correctOptionIndex, knowledgeContext, topic } = questionData;
+            // Destructure questionData, ensuring 'text' is used for the question itself.
+            const { text: questionText, options, correctOptionIndex, knowledgeContext, topic } = questionData;
             const correctAnswerText = options[correctOptionIndex];
             const isCorrect = selectedOptionIndex === correctOptionIndex;
 
             let prompt;
             if (isCorrect) {
                 prompt = `أنت معلم مساعد خبير في مادة علم النفس. الطالب أجاب على السؤال التالي بشكل صحيح:
-السؤال: "${question}"
+السؤال: "${questionText}"
 إجابة الطالب (الصحيحة): "${userAnswerText.substring(userAnswerText.indexOf(')') + 1).trim()}"
 الرجاء تقديم رد موجز ومشجع جداً باللغة العربية مثل "أحسنت!" أو "إجابة رائعة، ممتاز!" أو "صحيح! استمر في هذا التركيز!". لا تذكر معلومات عن الشريحة أو المنهج. اجعل الرد في جملة واحدة قصيرة ومبهجة.`;
             } else {
                 prompt = `أنت معلم مساعد خبير في مادة علم النفس. الطالب أجاب على السؤال التالي بشكل خاطئ:
-السؤال: "${question}"
+السؤال: "${questionText}"
 إجابة الطالب (الخاطئة): "${userAnswerText.substring(userAnswerText.indexOf(')') + 1).trim()}"
 الإجابة الصحيحة هي: "${correctAnswerText.substring(correctAnswerText.indexOf(')') + 1).trim()}"
 المعلومات المتعلقة بهذا السؤال من المنهج الدراسي هي عن موضوع "${topic}" وتم شرحها في سياق "${knowledgeContext}"
@@ -1205,7 +1211,7 @@
 اجعل الشرح واضحًا، تعليميًا، ومشجعًا. تجنب استخدام أسلوب التوبيخ. لا تستخدم Markdown headings. استخدم <br> للفصل بين الفقرات إذا لزم الأمر.`;
             }
             
-            const apiKey = ""; 
+            const apiKey = "AIzaSyChIOxuTAmBVpUddd3u77335X-GjnSn12Y"; // API Key inserted here
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
@@ -1245,6 +1251,54 @@
             }
             return array;
         }
+
+        // --- Custom Modal for Alerts ---
+        function displayModal(message) {
+            // Check if a modal already exists
+            let modal = document.getElementById('customModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'customModal';
+                modal.style.position = 'fixed';
+                modal.style.left = '50%';
+                modal.style.top = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+                modal.style.backgroundColor = 'white';
+                modal.style.padding = '25px'; // Increased padding
+                modal.style.border = '1px solid #ccc';
+                modal.style.borderRadius = '12px'; // More rounded corners
+                modal.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'; // Softer shadow
+                modal.style.zIndex = '10000';
+                modal.style.textAlign = 'center'; // Center text
+                modal.style.fontFamily = "'Almarai', sans-serif"; // Match body font
+                modal.style.color = 'var(--text-dark)'; // Match text color
+
+                const messageP = document.createElement('p');
+                messageP.style.fontSize = '1.1rem'; // Slightly larger text
+                messageP.style.marginBottom = '20px'; // Space before button
+                modal.appendChild(messageP);
+
+                const closeButton = document.createElement('button');
+                closeButton.textContent = 'حسنًا';
+                closeButton.style.padding = '10px 20px';
+                closeButton.style.backgroundColor = 'var(--primary-color)';
+                closeButton.style.color = 'white';
+                closeButton.style.border = 'none';
+                closeButton.style.borderRadius = '8px';
+                closeButton.style.cursor = 'pointer';
+                closeButton.style.fontSize = '1rem';
+                closeButton.onclick = () => {
+                    modal.style.display = 'none';
+                };
+                modal.appendChild(closeButton);
+                document.body.appendChild(modal);
+            }
+            
+            // Set message and display
+            modal.querySelector('p').textContent = message;
+            modal.style.display = 'block';
+        }
+
 
         startLessonBtn.addEventListener('click', () => {
             currentLessonPart = 1; 
@@ -1311,5 +1365,3 @@
     </script>
 </body>
 </html>
-
-
