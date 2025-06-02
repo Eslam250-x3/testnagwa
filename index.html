@@ -120,8 +120,8 @@
         .nav-thumbnails-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
         .nav-thumbnail {
-            min-width: 100px; 
-            width: 100px; 
+            min-width: 60px; /* Adjusted for icon */
+            width: 60px;    /* Adjusted for icon */
             height: 50px; 
             border: 2px solid #e5e7eb; 
             border-radius: 0.375rem; 
@@ -138,7 +138,7 @@
             white-space: nowrap;
             text-overflow: ellipsis;
             flex-shrink: 0; 
-            direction: rtl; 
+            /* direction: rtl; /* Removed as icon itself is not RTL text */
         }
         .nav-thumbnail:hover {
             border-color: #6366f1; 
@@ -162,7 +162,24 @@
              transform: none;
              background-color: #e5e7eb;
         }
-        
+        .nav-thumbnail i { /* Style for icons in thumbnails */
+            color: #4b5563; /* Default icon color (gray-600) */
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-thumbnail:hover i {
+            color: #4f46e5; /* Indigo-600 on hover */
+        }
+        .nav-thumbnail.active i {
+            color: #4338ca; /* Indigo-700 when active */
+        }
+        .nav-thumbnail.locked i {
+            color: #6b7280; /* Gray-500 when locked */
+        }
+         .nav-thumbnail.locked:hover i {
+            color: #6b7280; /* Gray-500 when locked and hovered */
+        }
+
+
         .nav-arrows button {
             padding: 0.75rem; 
             border-radius: 9999px; 
@@ -250,12 +267,11 @@
             border-radius: 0.5rem;
             text-align: center;
         }
-        /* Ensure slides container can capture swipe without interfering with internal scrollable elements like question text */
         #slides-container {
-            touch-action: pan-y; /* Allow vertical scroll, horizontal will be handled by JS */
+            touch-action: pan-y; 
         }
         .next-slide-btn {
-            display: none; /* Initially hidden */
+            display: none; 
             margin: 10px auto 0;
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
@@ -673,11 +689,10 @@
         let slides = []; 
         let navThumbnails = []; 
         let currentSlide = 0;
-        let studentErrors = { "مراحل تاريخية": 0, "مدارس علم النفس": 0 }; // Not directly used for locking, but kept for adaptive test
+        let studentErrors = { "مراحل تاريخية": 0, "مدارس علم النفس": 0 };
         let adaptiveTestTimerInterval;
-        const SWIPE_THRESHOLD = 50; // Min pixels for swipe
+        const SWIPE_THRESHOLD = 50; 
 
-        // --- Section Locking Constants & State ---
         const SECTION_1_CATEGORY = "مراحل تاريخية";
         const SECTION_2_CATEGORY = "مدارس علم النفس";
         const MIN_CORRECT_TO_UNLOCK_SECTION_2 = 3;
@@ -685,19 +700,16 @@
 
         let sectionProgress = {
             [SECTION_1_CATEGORY]: {
-                // Stores { id: string, correct: boolean } for the last RELEVANT_QUESTION_COUNT_FOR_UNLOCK answered unique questions
                 recentUniqueAnswers: [], 
                 correctInLastUniqueFive: 0,
-                section2Unlocked: false // Tracks if Section 2 is unlocked by performance in Section 1
+                section2Unlocked: false 
             },
-            [SECTION_2_CATEGORY]: { // This section's progress doesn't unlock other sections in this specific logic
+            [SECTION_2_CATEGORY]: { 
                 recentUniqueAnswers: [],
                 correctInLastUniqueFive: 0,
             }
         };
-        // --- End Section Locking ---
-
-
+      
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -711,7 +723,7 @@
                 `<button class="answer-btn bg-white border-2 border-gray-300 rounded-lg p-3 text-right transition duration-150 text-lg ${opt.isCorrect ? 'correct-answer' : ''}" data-answer-value="${opt.text}" data-answer-topic="${questionData.topic || ''}">${opt.text}</button>`
             ).join('');
 
-            const displaySlideTitle = "سؤال"; // Standard title for all question slides
+            const displaySlideTitle = "سؤال"; 
 
             return `
                 <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="${displaySlideTitle}" data-slide-category="${questionData.category}" data-is-question="true">
@@ -756,10 +768,11 @@
                 const category = slide.dataset.slideCategory;
                 if (category === SECTION_2_CATEGORY && !sectionProgress[SECTION_1_CATEGORY].section2Unlocked) {
                     thumbnail.classList.add('locked');
-                    thumbnail.title = `يجب إجابة ${MIN_CORRECT_TO_UNLOCK_SECTION_2} أسئلة صحيحة من آخر ${RELEVANT_QUESTION_COUNT_FOR_UNLOCK} في قسم '${SECTION_1_CATEGORY}' لفتح هذا القسم.`;
+                    thumbnail.title = `${thumbnail.title} (مغلق - أكمل القسم السابق لفتحه)`;
                 } else {
                     thumbnail.classList.remove('locked');
-                    thumbnail.title = ''; 
+                    // Remove the locked part of the title if it was added
+                    thumbnail.title = thumbnail.title.replace(/ \(مغلق - أكمل القسم السابق لفتحه\)/, '');
                 }
             });
         }
@@ -772,8 +785,17 @@
                 const thumbnail = document.createElement('button');
                 thumbnail.className = 'nav-thumbnail';
                 const slideTitle = slide.dataset.slideTitle || `شريحة ${index + 1}`;
-                thumbnail.textContent = slideTitle;
                 thumbnail.dataset.slide = index;
+                thumbnail.title = slideTitle; // Tooltip with original slide title
+
+                let iconHTML = '';
+                // Determine slide type for icon
+                if (slide.dataset.isQuestion === "true" || slide.dataset.slideTitle === "سؤال" || slide.dataset.slideTitle === "اختبار تكيفي") {
+                    iconHTML = '<i class="fas fa-question-circle text-xl"></i>'; // Question icon
+                } else {
+                    iconHTML = '<i class="fas fa-file-alt text-xl"></i>'; // Explanation icon
+                }
+                thumbnail.innerHTML = iconHTML;
                 
                 if(index === currentSlide) thumbnail.classList.add('active');
                 
@@ -784,9 +806,10 @@
             });
             navThumbnails = Array.from(navThumbnailsContainer.querySelectorAll('.nav-thumbnail'));
             updateNavButtons();
-            updateThumbnailLockStatus(); // Initial lock status for thumbnails
+            updateThumbnailLockStatus(); 
             setupAllQuestionSlides(); 
         }
+
 
         function updateNavButtons() {
             if (!prevBtnTop || !nextBtnTop || navThumbnails.length === 0) return;
@@ -804,12 +827,11 @@
         }
         
         function showCustomAlert(message, type = 'error') {
-            // Remove any existing alert
             const existingAlert = document.querySelector('.custom-alert-message');
             if (existingAlert) existingAlert.remove();
 
             const alertDiv = document.createElement('div');
-            alertDiv.classList.add('custom-alert-message'); // For easy removal
+            alertDiv.classList.add('custom-alert-message'); 
             let bgColor, textColor, borderColor;
             switch (type) {
                 case 'success':
@@ -835,10 +857,9 @@
             const targetSlide = slides[slideIndex];
             const targetCategory = targetSlide.dataset.slideCategory;
 
-            // Check for Section 2 lock
             if (targetCategory === SECTION_2_CATEGORY && !sectionProgress[SECTION_1_CATEGORY].section2Unlocked) {
                 showCustomAlert(`يجب عليك إجابة ${MIN_CORRECT_TO_UNLOCK_SECTION_2} أسئلة بشكل صحيح من آخر ${RELEVANT_QUESTION_COUNT_FOR_UNLOCK} أسئلة فريدة أجبت عليها في قسم '${SECTION_1_CATEGORY}' لفتح هذا القسم.`);
-                return; // Prevent navigation
+                return; 
             }
 
             if (slides[currentSlide]) slides[currentSlide].classList.remove('active');
@@ -850,7 +871,7 @@
             if (navThumbnails[currentSlide]) navThumbnails[currentSlide].classList.add('active');
             
             updateNavButtons();
-            updateThumbnailLockStatus(); // Update lock status on thumbnails after navigation
+            updateThumbnailLockStatus(); 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
@@ -919,7 +940,7 @@
 
                 answerButtons.forEach(btn => {
                     btn.addEventListener('click', function() {
-                        if (checkBtn.disabled) return; // Don't allow changing answer after submission
+                        if (checkBtn.disabled) return; 
 
                         answerButtons.forEach(b => b.classList.remove('selected-temp', 'correct', 'incorrect'));
                         this.classList.add('selected-temp');
@@ -931,12 +952,12 @@
                         if(aiFeedbackDiv) aiFeedbackDiv.classList.add('hidden');
                         const loadingSpinner = document.getElementById(`loading-${questionId}`);
                         if(loadingSpinner) loadingSpinner.classList.add('hidden');
-                        if(nextQuestionBtn) nextQuestionBtn.style.display = 'none'; // Hide next button if re-selecting
+                        if(nextQuestionBtn) nextQuestionBtn.style.display = 'none'; 
                     });
                 });
 
                 if (checkBtn) {
-                    const newCheckBtn = checkBtn.cloneNode(true); // To remove previous listeners if any
+                    const newCheckBtn = checkBtn.cloneNode(true); 
                     checkBtn.parentNode.replaceChild(newCheckBtn, checkBtn);
 
                     newCheckBtn.addEventListener('click', function() {
@@ -952,7 +973,7 @@
                         const questionText = questionTextElement ? questionTextElement.innerText.trim() : "نص السؤال غير موجود";
                         const userAnswerValue = selectedButton.dataset.answerValue;
                         
-                        const currentQuestionSlideElement = slides[currentSlide]; // The current slide *is* the question slide
+                        const currentQuestionSlideElement = slides[currentSlide]; 
                         const questionCategory = currentQuestionSlideElement.dataset.slideCategory;
 
                         if (isCorrect) {
@@ -967,38 +988,31 @@
                                 incorrectAnswerFeedbackDiv.classList.remove('hidden');
                             }
                             if(correctAnswerFeedbackDiv) correctAnswerFeedbackDiv.classList.add('hidden');
-                            // studentErrors logic for adaptive test (not directly for locking here)
                             if (questionCategory && studentErrors.hasOwnProperty(questionCategory)) {
                                 studentErrors[questionCategory]++;
                             }
                         }
                         
-                        // Update section progress for Section 1 questions to unlock Section 2
                         if (questionCategory === SECTION_1_CATEGORY) {
                             const currentProgress = sectionProgress[SECTION_1_CATEGORY];
-                            // Remove this question's previous answer if it exists to ensure uniqueness in recentUniqueAnswers
                             currentProgress.recentUniqueAnswers = currentProgress.recentUniqueAnswers.filter(ans => ans.id !== questionId);
-                            // Add current answer to the end
                             currentProgress.recentUniqueAnswers.push({ id: questionId, correct: isCorrect });
-                            // Keep only the last RELEVANT_QUESTION_COUNT_FOR_UNLOCK answers
                             if (currentProgress.recentUniqueAnswers.length > RELEVANT_QUESTION_COUNT_FOR_UNLOCK) {
                                 currentProgress.recentUniqueAnswers.shift();
                             }
-                            // Recalculate correctInLastUniqueFive
                             currentProgress.correctInLastUniqueFive = currentProgress.recentUniqueAnswers.filter(ans => ans.correct).length;
 
                             if (!currentProgress.section2Unlocked && currentProgress.correctInLastUniqueFive >= MIN_CORRECT_TO_UNLOCK_SECTION_2) {
                                 currentProgress.section2Unlocked = true;
                                 showCustomAlert(`تهانينا! لقد تم فتح قسم '${SECTION_2_CATEGORY}'. يمكنك الآن تصفح شرائحه.`, 'success');
-                                updateThumbnailLockStatus(); // Update thumbnails immediately
+                                updateThumbnailLockStatus(); 
                             }
                         }
-
 
                         getAIFeedback(questionId, questionText, userAnswerValue, isCorrect, correctAnswerValue);
                         newCheckBtn.disabled = true; 
                         newCheckBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                        if(nextQuestionBtn) nextQuestionBtn.style.display = 'block'; // Show next button
+                        if(nextQuestionBtn) nextQuestionBtn.style.display = 'block'; 
                     });
                 }
                 if (nextQuestionBtn) {
@@ -1006,9 +1020,8 @@
                         if (currentSlide < slides.length - 1) {
                             goToSlide(currentSlide + 1);
                         } else {
-                             // If it's the last question slide overall, or last in its section leading to adaptive test
                             const adaptiveTestTrigger = document.getElementById('trigger-adaptive-test-btn');
-                            if (adaptiveTestTrigger && !adaptiveTestTrigger.parentElement.closest('.slide.hidden')) { // Check if trigger is visible
+                            if (adaptiveTestTrigger && !adaptiveTestTrigger.parentElement.closest('.slide.hidden')) { 
                                 adaptiveTestTrigger.click();
                             } else {
                                 showCustomAlert("لقد وصلت إلى نهاية الأسئلة في هذا القسم.", "info");
@@ -1057,21 +1070,7 @@
         }
 
         function prepareAndShowAdaptiveTest() {
-            // Logic for selecting questions based on studentErrors (kept for potential future use or if adaptive logic is more complex)
-            // For now, let's assume it always generates a test if this function is called.
-            let adaptiveTestQuestionsPool = [...questionBank]; // Use all questions for now, or implement error-based selection
-            
-            // If studentErrors were to be used:
-            // let weakestCategory = SECTION_1_CATEGORY; 
-            // if (studentErrors[SECTION_2_CATEGORY] > studentErrors[SECTION_1_CATEGORY]) {
-            // weakestCategory = SECTION_2_CATEGORY;
-            // }
-            // adaptiveTestQuestionsPool = questionBank.filter(q => q.category === weakestCategory);
-            // if (adaptiveTestQuestionsPool.length < 20) { 
-            // const otherCategory = weakestCategory === SECTION_1_CATEGORY ? SECTION_2_CATEGORY : SECTION_1_CATEGORY;
-            // const additionalQuestions = questionBank.filter(q => q.category === otherCategory);
-            // adaptiveTestQuestionsPool = adaptiveTestQuestionsPool.concat(shuffleArray(additionalQuestions));
-            // }
+            let adaptiveTestQuestionsPool = [...questionBank]; 
             
             const finalAdaptiveTestQuestions = shuffleArray(adaptiveTestQuestionsPool).slice(0, 20); 
 
@@ -1082,10 +1081,10 @@
 
             const adaptiveTestSlideHTML = createAdaptiveTestSlide(finalAdaptiveTestQuestions);
             const existingAdaptiveSlide = document.getElementById('adaptive-test-slide-content');
-            if (existingAdaptiveSlide) existingAdaptiveSlide.remove(); // Remove old one if exists
+            if (existingAdaptiveSlide) existingAdaptiveSlide.remove(); 
             
             slidesContainer.insertAdjacentHTML('beforeend', adaptiveTestSlideHTML);
-            initializeSlidesAndNavigation(); // Re-initialize to include the new slide
+            initializeSlidesAndNavigation(); 
 
             document.querySelectorAll('#adaptive-questions-container .answer-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1176,7 +1175,6 @@
             }
         }
 
-        // --- Swipe Navigation ---
         let xDown = null;
         let yDown = null;
         const swipeContainer = document.getElementById('slides-container');
@@ -1201,7 +1199,7 @@
             let yDiff = yDown - yUp;
 
             if (Math.abs(xDiff) > Math.abs(yDiff)) {
-                evt.preventDefault(); // Prevent vertical scroll if horizontal swipe is dominant
+                evt.preventDefault(); 
             }
         }
 
@@ -1214,11 +1212,11 @@
             let xDiff = xDown - xUp; 
             let yDiff = yDown - yUp;
 
-            if (Math.abs(xDiff) > Math.abs(yDiff)) { // Horizontal swipe
+            if (Math.abs(xDiff) > Math.abs(yDiff)) { 
                 if (Math.abs(xDiff) > SWIPE_THRESHOLD) {
-                    if (xDiff > 0) { // Swiped left (visual next in RTL)
+                    if (xDiff > 0) { 
                         if (currentSlide < slides.length - 1) nextBtnTop.click();
-                    } else { // Swiped right (visual prev in RTL)
+                    } else { 
                         if (currentSlide > 0) prevBtnTop.click();
                     }
                 }
@@ -1227,20 +1225,15 @@
             yDown = null;
         }
 
-
-        // --- Initial Setup ---
         document.addEventListener('DOMContentLoaded', function() {
-            // Insert questions for Section 1 ("مراحل تاريخية")
-            const historicalQuestions = shuffleArray(questionBank.filter(q => q.category === SECTION_1_CATEGORY)).slice(0, 10); // Take up to 10 questions
+            const historicalQuestions = shuffleArray(questionBank.filter(q => q.category === SECTION_1_CATEGORY)).slice(0, 10); 
             const historicalQuestionsHTML = historicalQuestions.map((q, i) => createQuestionSlideHTML(q, slidesContainer.children.length + i));
             insertSlidesAfterElement(historicalQuestionsHTML, 'historical-stages-end');
 
-            // Insert questions for Section 2 ("مدارس علم النفس")
-            const schoolQuestions = shuffleArray(questionBank.filter(q => q.category === SECTION_2_CATEGORY)).slice(0, 10); // Take up to 10 questions
+            const schoolQuestions = shuffleArray(questionBank.filter(q => q.category === SECTION_2_CATEGORY)).slice(0, 10); 
             const schoolQuestionsHTML = schoolQuestions.map((q, i) => createQuestionSlideHTML(q, slidesContainer.children.length + i));
             insertSlidesAfterElement(schoolQuestionsHTML, 'schools-of-psychology-end');
             
-            // Add adaptive test trigger button after the last question of the second section
             const allSlidesAfterInsertion = Array.from(slidesContainer.querySelectorAll('.slide'));
             let lastSchoolQuestionSlide = null;
             for(let i = allSlidesAfterInsertion.length -1; i >=0; i--) {
@@ -1249,7 +1242,6 @@
                     break;
                 }
             }
-            // If no school questions, fallback to the end of school explanation slides
             if (!lastSchoolQuestionSlide) {
                 lastSchoolQuestionSlide = document.getElementById('schools-of-psychology-end');
             }
@@ -1264,12 +1256,10 @@
                 `;
                 const slideContent = lastSchoolQuestionSlide.querySelector('.slide-content');
                 if (slideContent) { 
-                    // Remove the original "Check Answer" button and "Next Question" if they were part of the static HTML of the last slide before dynamic insertion
                     const existingCheckButtonContainer = slideContent.querySelector('.flex.justify-center.mt-6');
                     if (existingCheckButtonContainer) existingCheckButtonContainer.remove();
                     const existingNextQuestionBtn = slideContent.querySelector('.next-slide-btn');
                      if (existingNextQuestionBtn) existingNextQuestionBtn.remove();
-
 
                     slideContent.insertAdjacentHTML('beforeend', adaptiveTestTriggerButtonHTML);
                 }
@@ -1278,7 +1268,6 @@
                 if (triggerBtn) {
                     triggerBtn.addEventListener('click', () => {
                         prepareAndShowAdaptiveTest();
-                        // Automatically go to the adaptive test slide after it's created
                         const adaptiveSlide = document.getElementById('adaptive-test-slide-content');
                         if (adaptiveSlide) {
                             const allSlidesArray = Array.from(slidesContainer.querySelectorAll('.slide'));
@@ -1297,10 +1286,9 @@
             nextBtnTop.addEventListener('click', () => goToSlide(currentSlide + 1));
             document.addEventListener('keydown', (e) => {
                 if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') e.preventDefault(); // Prevent page scroll
-                // For RTL, ArrowRight means previous, ArrowLeft means next visually
-                if (e.key === 'ArrowRight' && currentSlide > 0) prevBtnTop.click(); // Corresponds to visual "Previous"
-                else if (e.key === 'ArrowLeft' && currentSlide < slides.length - 1) nextBtnTop.click(); // Corresponds to visual "Next"
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') e.preventDefault(); 
+                if (e.key === 'ArrowRight' && currentSlide > 0) prevBtnTop.click(); 
+                else if (e.key === 'ArrowLeft' && currentSlide < slides.length - 1) nextBtnTop.click(); 
             });
         });
 
