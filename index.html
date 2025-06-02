@@ -5,1244 +5,663 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نشأة علم النفس وتطوره</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Lalezar&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #7c3aed; 
-            --secondary-color: #60a5fa; 
-            --accent-color: #f472b6; 
-            --text-dark: #1f2937; 
-            --text-light: #f3f4f6; 
-            --bg-light: #f9fafb; 
-            --important-keyword-color: #ef4444; /* اللون الأحمر للكلمات المهمة */
-            --card-bg: #ffffff;
-            --question-prompt-bg: #eef2ff; 
-            --example-card-bg: #f0fdf4; 
-            --star-color: #ffc107; 
-        }
-
         body {
-            font-family: 'Almarai', sans-serif;
-            margin: 0;
-            background: linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%);
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center; 
-            min-height: 100vh;
-            padding: 10px;
+            font-family: 'Cairo', sans-serif;
+            background-color: #f7fafc;
+            padding-top: 80px; 
+            overflow-x: hidden; /* Prevent horizontal scroll on body due to potential swipe issues */
         }
-
-        .presentation-outer-frame {
-            padding: 8px; 
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 25px; 
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2); 
-            width: 100%;
-            max-width: 1100px; 
-        }
-
-        .presentation-container {
-            background-color: var(--bg-light);
-            border-radius: 18px; 
-            box-shadow: inset 0 1px 3px 0 rgba(0,0,0,0.04);
-            overflow: hidden;
-            position: relative;
-        }
-
+        
         .slide {
             display: none;
-            padding: 20px 30px; 
-            min-height: 500px; 
-            animation: slideFadeInRight 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-sizing: border-box; 
+            animation: fadeIn 0.5s ease-in-out;
+            min-height: 70vh; 
         }
-
-        @keyframes slideFadeInRight {
-            0% { opacity: 0.4; transform: translateX(50px) scale(0.96); }
-            100% { opacity: 1; transform: translateX(0) scale(1); }
-        }
-         @keyframes starShine {
-            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-            50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
-        }
-
+        
         .slide.active {
             display: block;
         }
-
-        .slide-title {
-            font-family: 'Lalezar', cursive;
-            font-size: 2.8rem; 
-            font-weight: 400;
-            color: var(--primary-color);
-            margin-bottom: 25px; 
-            text-align: right;
-            padding-bottom: 12px; 
-            position: relative;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.04);
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .slide-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 80px; 
-            height: 3px;  
-            background: linear-gradient(to left, var(--accent-color), var(--secondary-color));
-            border-radius: 1.5px;
-            box-shadow: 0 1px 2px rgba(244, 114, 182, 0.25);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
         }
         
-        #slide0_intro .lesson-title-main {
-            font-family: 'Lalezar', cursive;
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #slide0_intro .toc-list {
-            list-style-type: none;
-            padding-right: 0; 
-            margin-bottom: 20px;
-        }
-        /* This rule applies the purple solid circle to main ToC items */
-        #slide0_intro .toc-list > li {
-            font-size: 1.2rem;
-            color: var(--text-dark);
-            padding: 10px 35px 10px 0; /* Increased right padding for bullet */
-            border-bottom: 1px solid #e5e7eb; 
-            position: relative;
-        }
-        /* This is the purple solid circle style for main ToC items */
-        #slide0_intro .toc-list > li::before { 
-            font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f111'; /* fa-circle icon */
-            font-weight: 900; /* Solid version of the icon */
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.9em; 
-            color: var(--primary-color); /* Purple color */
-        }
-
-        #slide0_intro .toc-list > li:last-child {
-            border-bottom: none;
-        }
-        #slide0_intro .toc-list ul {
-            list-style-type: none;
-            padding-right: 25px; /* Indentation for sub-list */
-            margin-top: 8px;
-        }
-        #slide0_intro .toc-list ul li {
-            font-size: 1rem;
-            color: #4b5563; 
-            padding: 6px 25px 6px 0; 
-            position: relative;
-        }
-         /* This is the blue hollow circle style for sub-ToC items */
-         #slide0_intro .toc-list ul li::before { 
-            font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f10c'; /* fa-circle (hollow with font-weight 400) or similar like fa-circle-o from older FA */
-            font-weight: 400; 
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.8em; 
-            color: var(--secondary-color); /* Blue color */
-        }
-
-
-        .text-shape {
-            background-color: var(--card-bg);
-            padding: 20px 25px; 
-            border-radius: 10px 10px 10px 40px; 
-            box-shadow: 0 8px 20px -6px rgba(100, 116, 139, 0.12);
-            margin-top: 15px; 
-            font-size: 1.1rem; 
-            line-height: 1.9;   
-            color: var(--text-dark);
-        }
-        .text-shape::before { display: none; } 
-
-
-        .question-prompt-card {
-            background-color: var(--question-prompt-bg);
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 18px;
-            border-right: 4px solid var(--primary-color); 
-            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.07);
-            font-size: 1.05rem;
-            line-height: 1.65;
-        }
-        
-        .example-card {
-            background-color: var(--example-card-bg);
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-top: 15px;
-            margin-bottom: 15px;
-            border-right: 4px solid var(--secondary-color); 
-            box-shadow: 0 3px 10px rgba(96, 165, 250, 0.07);
-            font-size: 1rem;
-            line-height: 1.75;
-        }
-        .example-card ul {
-            list-style-type: none;
-            padding-right: 0;
-        }
-        .example-card ul > li {
-            padding-right: 25px; 
-            position: relative;
-            margin-bottom: 8px;
-        }
-        .example-card ul > li::before {
-            font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f104'; 
-            font-weight: 900;
-            position: absolute;
-            right: 0px;
-            top: 5px; 
-            font-size: 0.9em; 
-            color: var(--secondary-color);
-        }
-
-        .quiz-question-counter {
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px; /* More rounded */
-            font-size: 1rem; /* Slightly larger */
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: inline-block; /* To fit content */
-            min-width: 150px; /* Minimum width */
-            position: relative; /* For potential pseudo-elements if needed */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-
-        .feedback {
-            margin-top: 18px; 
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            font-size: 1rem; 
-            line-height: 1.6;
-            opacity: 0; 
-            animation: feedbackPopIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .feedback .star-icon {
-            color: var(--star-color);
-            font-size: 1.8em; /* Larger star */
-            margin-right: 8px; 
-            vertical-align: middle;
-            display: inline-block; /* For animation */
-            animation: starShine 1s ease-in-out;
-        }
-        .feedback p { margin-bottom: 0.3em; }
-        .feedback.loading { background-color: #e0e7ff; color: var(--primary-color); }
-        .feedback.ai-response { background-color: #fafafa; border: 1px solid #e5e7eb; }
-        
-        @keyframes feedbackPopIn {
-            0% { opacity: 0; transform: translateY(12px) scale(0.95); }
-            70% { opacity: 1; transform: translateY(-4px) scale(1.02); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
-        .quiz-option {
-            display: block;
-            width: 100%;
-            background: linear-gradient(to right, #f3e8ff, #e0e7ff);
-            color: var(--primary-color);
-            padding: 16px; 
-            margin-bottom: 12px; 
-            border-radius: 10px; 
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
-            border: 1px solid #ddd6fe;
-            text-align: right;
-            font-weight: 600; 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.04);
-        }
-
-        .quiz-option:hover:not(.selected):not([disabled]) { 
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            transform: translateY(-3px) scale(1.015); 
-            border-color: var(--primary-color);
-            box-shadow: 0 6px 12px rgba(124, 58, 237, 0.2); 
-        }
-        .quiz-option:focus { outline: none; box-shadow: 0 0 0 2px rgba(var(--primary-color), 0.4); }
-        .quiz-option.selected { 
-            border-color: var(--accent-color);
-            background: linear-gradient(to right, var(--accent-color), #fb7185);
-            color: white;
-        }
-        .quiz-option.correct-answer-highlight { 
-            background: linear-gradient(to right, #a7f3d0, #6ee7b7) !important; 
-            color: #047857 !important; 
-            border-color: #34d399 !important;
-        }
-
-        .progress-bar-container {
-            width: calc(100% - 50px); 
-            margin: 20px auto 25px auto; 
-            background-color: rgba(255,255,255,0.35); 
-            border-radius: 8px; 
-            height: 10px; 
-            overflow: hidden;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); 
-            border: 1px solid rgba(0,0,0,0.04);
-        }
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(to right, var(--accent-color), var(--primary-color), var(--secondary-color));
-            border-radius: 8px 0 0 8px; 
-            transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1); 
-            position: relative;
-        }
-        .progress-bar::after { 
-            content: '';
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.2) 100%);
-            opacity: 0.5;
-        }
-
-        .slide-image {
-            max-width: 60%; 
-            height: auto;
-            border-radius: 12px; 
-            margin: 25px auto; 
-            display: block;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-            border: 1px solid white; 
-        }
-        .slide-image:hover {
-            transform: scale(1.03) rotate(0.3deg); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15); 
-        }
-        
-        .quiz-navigation-button, .summary-button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.25s, transform 0.2s;
-            margin-top: 15px;
-            border: none;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.08);
-        }
-        .quiz-navigation-button:hover, .summary-button:hover {
-            background-color: #6b21a8; 
-            transform: translateY(-1px);
-        }
-        .quiz-navigation-button:disabled {
-            background-color: #a78bfa; 
-            cursor: not-allowed;
-            transform: translateY(0);
-        }
-        .summary-button {
-             background-color: var(--secondary-color);
-        }
-         .summary-button:hover {
-             background-color: #3b82f6; /* Darker blue */
-        }
-
-        .performance-summary-container {
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .performance-summary-container h3 {
-            font-family: 'Lalezar', cursive;
-            color: var(--primary-color);
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
-        }
-        .performance-summary-container .summary-section {
-            margin-bottom: 20px;
-        }
-        .performance-summary-container .summary-section h4 {
-            font-weight: bold;
-            color: var(--text-dark);
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-        }
-        .performance-summary-container .summary-section ul {
-            list-style-type: none; 
-            padding-right: 0; 
-        }
-         .performance-summary-container .summary-section li {
-            margin-bottom: 8px; 
-            font-size: 1rem;
-            padding-right: 25px; 
-            position: relative;
-         }
-         .performance-summary-container .summary-section li::before {
-            font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            position: absolute;
-            right: 0;
-            top: 3px;
-            font-size: 1em;
-         }
-         .performance-summary-container .summary-section .strength li::before { content: '\f00c'; color: #16a34a; } 
-         .performance-summary-container .summary-section .weakness li::before { content: '\f071'; color: #dc2626; } 
-
-
-        /* General list styling within text-shape to match user's image */
-        .text-shape ul {
-            list-style-type: none;
-            padding-right: 0; 
-        }
-        .text-shape ul > li {
-            padding-right: 30px; 
-            position: relative;
-            margin-bottom: 12px; 
-            line-height: 1.9;
-        }
-        .text-shape ul > li::before {
-            font-family: "Font Awesome 6 Solid", "Font Awesome 6 Free";
-            content: '\f058'; 
-            font-weight: 900;
-            position: absolute;
-            right: 0;
-            top: 5px; 
-            font-size: 1.1em;
-            color: var(--accent-color); 
-        }
-        /* Styling for nested lists within text-shape */
-        .text-shape ul ul {
-            margin-top: 8px;
-            padding-right: 20px; 
-        }
-        .text-shape ul ul > li::before {
-            content: '\f111'; 
-            font-size: 0.8em;
-            color: var(--secondary-color);
-            top: 6px;
-        }
-        
-        /* Style for important keywords */
-        .important-keyword {
-            color: var(--important-keyword-color);
+        .highlight { 
             font-weight: 700; 
+            color: #4f46e5; /* Indigo-600 for important words, no background */
+        }
+        
+        .example-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #10b981; 
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .example-box:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .question-box {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6; 
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .slide-header {
+            padding: 1.5rem;
+            color: white;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+        .slide-content {
+            padding: 1.5rem; 
+        }
+        .icon-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            padding: 0.35rem 0.5rem; 
+            border-radius: 0.375rem; 
+        }
+        .icon-list li:hover {
+            background-color: #eef2ff; 
+            transform: translateX(-2px);
+        }
+        .icon-list .fa-circle, .icon-list .fas {
+            margin-left: 0.75rem; 
+            margin-top: 0.3rem; 
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px; 
+        }
+
+        .nav-thumbnails-container {
+            display: flex;
+            overflow-x: auto; 
+            overflow-y: hidden;
+            gap: 0.5rem; 
+            flex-grow: 1;
+            padding: 5px 0; 
+            -webkit-overflow-scrolling: touch; 
+            direction: ltr; 
+        }
+        .nav-thumbnails-container::-webkit-scrollbar { height: 6px; }
+        .nav-thumbnails-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .nav-thumbnails-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .nav-thumbnails-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+        .nav-thumbnail {
+            min-width: 100px; 
+            width: 100px; 
+            height: 50px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 0.375rem; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem; 
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out; 
+            background-color: #f9fafb; 
+            padding: 0.25rem;
+            overflow: hidden; 
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex-shrink: 0; 
+            direction: rtl; 
+        }
+        .nav-thumbnail:hover {
+            border-color: #6366f1; 
+            background-color: #eef2ff; 
+            transform: translateY(-2px);
+        }
+        .nav-thumbnail.active {
+            border-color: #4338ca; 
+            background-color: #e0e7ff; 
+            color: #4338ca; 
+            font-weight: bold;
+            transform: scale(1.05) translateY(-1px);
+        }
+        
+        .nav-arrows button {
+            padding: 0.75rem; 
+            border-radius: 9999px; 
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .nav-arrows button:hover {
+            background-color: #e5e7eb; 
+        }
+        .nav-arrows button:active {
+            transform: scale(0.95);
+        }
+        .nav-arrows button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #6366f1; 
+        }
+
+        .answer-btn {
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+        }
+        .answer-btn:hover:not(.correct):not(.incorrect):not(.selected-temp) {
+            background-color: #dbeafe !important; 
+            border-color: #60a5fa !important; 
+        }
+        .answer-btn:active:not(.correct):not(.incorrect) {
+            transform: scale(0.98);
+        }
+        .answer-btn.selected-temp { 
+             background-color: #c7d2fe !important; 
+             border-color: #818cf8 !important; 
+        }
+        .answer-btn.correct {
+            background-color: #d1fae5 !important; 
+            border-color: #10b981 !important; 
+            color: #065f46 !important; 
+            font-weight: bold;
+        }
+        .answer-btn.incorrect {
+            background-color: #fee2e2 !important; 
+            border-color: #ef4444 !important; 
+            color: #991b1b !important; 
+            font-weight: bold;
+        }
+        .ai-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #e0f2fe; 
+            border-left: 4px solid #0ea5e9; 
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #3498db; 
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .adaptive-test-timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc2626; 
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 0.5rem;
+            background-color: #fee2e2; 
+            border-radius: 0.375rem;
+        }
+        .adaptive-test-timer.low-time {
+            animation: pulse 1s infinite;
+        }
+        .adaptive-test-results {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: #f3e8ff; 
+            border: 2px solid #a855f7; 
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        /* Ensure slides container can capture swipe without interfering with internal scrollable elements like question text */
+        #slides-container {
+            touch-action: pan-y; /* Allow vertical scroll, horizontal will be handled by JS */
         }
 
     </style>
 </head>
-<body>
-    <div class="presentation-outer-frame">
-        <div class="presentation-container">
-            <div id="slide0_intro" class="slide active">
-                <h1 class="lesson-title-main text-center mb-6">نشأة علم النفس وتطوُّره</h1>
-                <div class="text-shape p-6 md:p-8">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4 text-center">محتويات الدرس:</h2>
-                    <ul class="toc-list space-y-2">
-                        <li>نظرة موجزة لنشأة علم النفس وتطوُّره</li>
-                        <li>المرحلة الفلسفية (اليونانية القديمة)</li>
-                        <li>المرحلة الفسيولوجية</li>
-                        <li>مرحلة الاستقلال</li>
-                        <li>
-                            أبرز مدارس واتجاهات علم النفس الحديث
-                            <ul class="mt-1">
-                                <li>المدرسة البنائية</li>
-                                <li>المدرسة السلوكية</li>
-                                <li>مدرسة التحليل النفسي</li>
-                                <li>مدرسة الجشطلت</li>
-                                <li>المدرسة المعرفية</li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <div class="text-center mt-8">
-                         <button id="startLessonBtn" class="quiz-navigation-button text-lg px-8 py-3">ابدأ الدرس</button>
-                    </div>
-                </div>
+<body class="bg-gray-100">
+    <div class="top-nav">
+        <div class="nav-arrows flex items-center space-x-2 space-x-reverse">
+            <button id="prev-btn-top" class="text-indigo-600"> <i class="fas fa-arrow-right"></i> </button>
+        </div>
+        <div class="nav-thumbnails-container" id="nav-thumbnails">
             </div>
+        <div class="nav-arrows flex items-center space-x-2 space-x-reverse">
+            <button id="next-btn-top" class="text-indigo-600"> <i class="fas fa-arrow-left"></i> </button>
+        </div>
+    </div>
 
-            <div id="slide1_content_origin_p1" class="slide">
-                <h2 class="slide-title">نظرة موجزة لنشأة علم النفس وتطوره</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li><span class="important-keyword">علم النفس</span> هو علم من العلوم <span class="important-keyword">الحديثة</span> نسبيًا، له ماض طويل، لكن تاريخه العلمي قصير.</li>
-                        <li>ظهر بمظهره العلمي الذي له موضوع واهتمامات محددة في <span class="important-keyword">الربع الأخير</span> من القرن التاسع عشر.</li>
-                    </ul>
-                    <div class="example-card">
-                        <p class="font-bold">جذور تاريخية:</p>
-                        <ul>
-                            <li><span class="important-keyword">علم النفس</span> بمظهره الحديث لم يظهر فجأة، بل له <span class="important-keyword">جذور تاريخية</span> تمتد إلى:</li>
-                            <li>التراث الشرقي القديم (<span class="important-keyword">الفرس</span> و<span class="important-keyword">الهنود</span>).</li>
-                            <li>بلاد اليونان (<span class="important-keyword">الإغريق</span>) وفلاسفتهم الكبار، وخاصة <strong class="important-keyword">سقراط</strong> و<strong class="important-keyword">أفلاطون</strong> و<strong class="important-keyword">أرسطو</strong>.</li>
+    <div id="slides-container" class="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
+        <div class="slide active bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="مقدمة" data-slide-category="مقدمة">
+            <div class="slide-header bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+                <h1 class="text-3xl md:text-4xl font-bold">نشأة علم النفس وتطوره</h1>
+            </div>
+            <div class="slide-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-indigo-700 mb-4 flex items-center"> <i class="fas fa-history ml-2 text-indigo-500"></i> المراحل التاريخية الرئيسية </h2>
+                        <ul class="space-y-3 text-gray-700 icon-list">
+                            <li><i class="fas fa-circle text-xs text-indigo-400"></i><span>المرحلة <span class="highlight">الفلسفية</span> (اليونانية القديمة)</span></li>
+                            <li><i class="fas fa-circle text-xs text-indigo-400"></i><span>المرحلة <span class="highlight">الفسيولوجية</span></span></li>
+                            <li><i class="fas fa-circle text-xs text-indigo-400"></i><span>مرحلة <span class="highlight">الاستقلال</span></span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-purple-700 mb-4 flex items-center"> <i class="fas fa-school ml-2 text-purple-500"></i> أبرز مدارس علم النفس </h2>
+                        <ul class="space-y-3 text-gray-700 icon-list">
+                            <li><i class="fas fa-shapes text-xs text-purple-400"></i><span>المدرسة <span class="highlight">البنائية</span></span></li>
+                            <li><i class="fas fa-running text-xs text-purple-400"></i><span>المدرسة <span class="highlight">السلوكية</span></span></li>
+                            <li><i class="fas fa-brain text-xs text-purple-400"></i><span>مدرسة <span class="highlight">التحليل النفسي</span></span></li>
+                            <li><i class="fas fa-puzzle-piece text-xs text-purple-400"></i><span>مدرسة <span class="highlight">الجشطلت</span></span></li>
+                            <li><i class="fas fa-lightbulb text-xs text-purple-400"></i><span>المدرسة <span class="highlight">المعرفية</span></span></li>
                         </ul>
                     </div>
                 </div>
-            </div>
-            <div id="slide2_content_origin_p2" class="slide">
-                <h2 class="slide-title">مراحل تطور علم النفس</h2>
-                <div class="text-shape">
-                     <div class="question-prompt-card">
-                        <p class="text-center font-bold text-lg">مراحل تطور <span class="important-keyword">علم النفس</span> الرئيسية هي:</p>
-                    </div>
-                    <ul>
-                        <li>المرحلة <span class="important-keyword">الفلسفية</span></li>
-                        <li>المرحلة <span class="important-keyword">الفسيولوجية</span></li>
-                        <li>مرحلة <span class="important-keyword">الاستقلال</span></li>
-                    </ul>
-                    <img src="https://placehold.co/500x250/60a5fa/ffffff?text=مراحل+التطور&font=lalezar" alt="رسم بياني يوضح مراحل تطور علم النفس" class="slide-image" onerror="this.onerror=null;this.src='https://placehold.co/500x250/60a5fa/ffffff?text=خطأ+في+تحميل+الصورة&font=almarai';">
+                <div class="mt-10 flex justify-center">
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 inline-flex items-center shadow"> <i class="fas fa-info-circle text-blue-500 ml-2"></i> <span class="text-blue-700 font-medium">استخدم الأسهم، الصور المصغرة، أو السحب (على الموبايل) للتنقل.</span> </div>
                 </div>
             </div>
-             <div id="slide3_content_origin_p3" class="slide">
-                <h2 class="slide-title">المرحلة الفلسفية (اليونانية القديمة)</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>اهتمت بدراسة <span class="important-keyword">ماهية النفس</span> ومعرفة حقيقتها.</li>
-                        <li>سميت هذه الدراسة من البداية باسم «<span class="important-keyword">علم النفس</span>».</li>
-                        <li>ارتبط علم النفس في هذه المرحلة <span class="important-keyword">بالنفس</span> أو <span class="important-keyword">الروح</span>.</li>
-                        <li>الروح في اعتقادهم هي مصدر <span class="important-keyword">السلوك</span>.</li>
-                    </ul>
-                     <div class="example-card">
-                        <ul>
-                            <li>فسروا من خلال مفهوم النفس أو الروح بواعث السلوك من <span class="important-keyword">أحلام</span> و<span class="important-keyword">تفكير</span> و<span class="important-keyword">حس</span> و<span class="important-keyword">إدراك</span> و<span class="important-keyword">حركة</span>.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div id="slide5_content_origin_p4" class="slide">
-                <h2 class="slide-title">المرحلة الفسيولوجية</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>بدأ <span class="important-keyword">علم النفس</span> يستقل فعليًا عن الفلسفة ويرتبط بعلم <span class="important-keyword">الفسيولوجيا</span> (علم وظائف الأعضاء).</li>
-                        <li>استفاد علم النفس من إمكانيات <span class="important-keyword">المنهج التجريبي</span> الذي كان مستخدمًا في هذه العلوم.</li>
-                        <li><strong class="important-keyword">فلهلم فونت</strong> من الرواد الأوائل الذين ساهموا في تحول علم النفس إلى المرحلة الفسيولوجية.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أبرز إسهامات <strong class="important-keyword">فونت</strong> في مجال الدراسات النفسية:</p>
-                        <ul>
-                            <li>أنشأ أول <span class="important-keyword">معمل لعلم النفس التجريبي</span> في العالم بجامعة ليبزج بألمانيا عام <span class="important-keyword">١٨٧٩م</span>.</li>
-                            <li>كان الاهتمام فيه منصبًا على إجراء تجارب نفس فسيولوجية عن موضوعين مرتبطين ارتباطا واضحًا بالسلوك البشري، وهما <span class="important-keyword">الإحساس</span> و<span class="important-keyword">الإدراك</span>، بهدف دراسة عمليات <span class="important-keyword">التفكير</span> أو <span class="important-keyword">الشعور</span>.</li>
-                            <li>أسس مجلة «الدراسات الفلسفية» عام <span class="important-keyword">١٨٨١م</span>.</li>
-                        </ul>
-                    </div>
-                     <div class="example-card">
-                        <p class="font-bold">تركزت البحوث التجريبية في معمل «فونت» التجريبي على ثلاثة محاور هي:</p>
-                        <ul>
-                            <li>عمليات <span class="important-keyword">الإدراك الحسي</span>.
-                                <ul>
-                                    <li>لمس سطح ما (منبه حسي) يتم إدراكه على أنه ناعم، خشن، بارد ساخن، إلخ.</li>
-                                    <li>رؤية لوحة فنية (منبه حسي) يتم إدراكها على أنها ألوان زاهية، أشكال هندسية، منظر طبيعي، إلخ.</li>
-                                </ul>
-                            </li>
-                            <li><span class="important-keyword">الطبيعة النفسية</span>، وهي أحد فروع علم النفس التي تهتم بدراسة العلاقة بين المثيرات الحسية والاستجابات أو ردود الأفعال الناتجة عنها.
-                                <ul>
-                                    <li>دراسة العلاقة بين درجة حرارة الغرفة وشعور الشخص بالراحة.</li>
-                                    <li>متابعة رد فعل الشخص عند سماع موسيقى صاخبة (الانزعاج أو الحماس).</li>
-                                </ul>
-                            </li>
-                            <li>دراسة <span class="important-keyword">زمن الرجع</span>، وهو الفاصل الزمني الذي يفصل بين ظهور المثير وحدوث الاستجابة.
-                                <ul>
-                                    <li>الوقت بين رؤية إشارة المرور الحمراء والضغط على فرامل السيارة.</li>
-                                    <li>المدة بين سماع صافرة البداية وانطلاق العداء في سباق.</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-             <div id="slide6_content_origin_p5" class="slide">
-                <h2 class="slide-title">مرحلة الاستقلال</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>عارض بعض العلماء ارتباط علم النفس بعلم الفسيولوجيا وعلم البيولوجيا.</li>
-                        <li>ظهرت بعض الحجج القوية التي كان لها أثر عميق بعد ذلك في <span class="important-keyword">استقلال علم النفس</span> موضوعًا ومنهجًا.</li>
-                        <li>أصبح موضوع علم النفس هو <strong><span class="important-keyword">السلوك الظاهري</span></strong>، ومنهجه هو <strong><span class="important-keyword">الملاحظة</span></strong> و<strong><span class="important-keyword">التجربة</span></strong>.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أمثلة:</p>
-                        <ul>
-                            <li>دراسة أسباب تفضيل بعض الطلاب للدراسة الفردية بدلا من الجماعية من خلال استبيانات وملاحظات سلوكية.</li>
-                            <li>قام الباحث <strong class="important-keyword">«سكينر»</strong> بدراسة عملية التعلم عند الحيوانات باستخدام التجارب المعملية؛ مما أدى إلى تطوير نظرية <span class="important-keyword">التعلم بالتعزيز</span>.</li>
-                            <li>فهم ظاهرة إدمان وسائل التواصل الاجتماعي من خلال دراسة أنماط استخدام الهواتف الذكية وتأثيرها على السلوك اليومي للأفراد.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        </div>
 
-            <div id="slide_quiz_section1" class="slide quiz-slide">
-                <h2 class="slide-title">اختبار مرحلي: نشأة علم النفس وتطوره</h2>
-                <div class="text-shape">
-                    <div id="quiz_section1_counter" class="quiz-question-counter"></div>
-                    <div id="quiz_section1_prompt" class="question-prompt-card"></div>
-                    <div id="quiz_section1_options" class="quiz-options" data-slideid="quiz_section1">
-                        </div>
-                    <div id="quiz_section1_feedback" class="feedback mt-4" aria-live="polite"></div>
-                    <button id="quiz_section1_next_q_btn" class="quiz-navigation-button" style="display: none;">السؤال التالي</button>
-                </div>
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="نظرة موجزة" data-slide-category="مراحل تاريخية">
+            <div class="slide-header bg-gradient-to-br from-sky-600 via-cyan-500 to-teal-400">
+                <h1 class="text-3xl md:text-4xl font-bold">نظرة موجزة لنشأة علم النفس وتطوره</h1>
+                <p class="mt-2 opacity-90 text-lg">الجذور التاريخية لعلم النفس</p>
             </div>
-            
-            <div id="slide8_content_schools_p1" class="slide">
-                 <h2 class="slide-title">أبرز مدارس واتجاهات علم النفس الحديث</h2>
-                <div class="text-shape">
-                    <div class="question-prompt-card">
-                        <p class="text-center font-bold text-lg"><span class="important-keyword">مدارس علم النفس</span> الحديث تشمل:</p>
-                    </div>
-                    <ul>
-                        <li>المدرسة <span class="important-keyword">البنائية</span></li>
-                        <li>المدرسة <span class="important-keyword">السلوكية</span></li>
-                        <li>مدرسة <span class="important-keyword">التحليل النفسي</span></li>
-                        <li>مدرسة <span class="important-keyword">الجشطلت</span></li>
-                        <li>المدرسة <span class="important-keyword">المعرفية</span></li>
-                    </ul>
-                    <img src="https://placehold.co/550x300/f472b6/ffffff?text=مدارس+علم+النفس&font=lalezar" alt="رسم توضيحي لمدارس علم النفس المختلفة" class="slide-image" onerror="this.onerror=null;this.src='https://placehold.co/550x300/f472b6/ffffff?text=خطأ+في+تحميل+الصورة&font=almarai';">
-                </div>
-            </div>
-            <div id="slide9_content_schools_p2" class="slide">
-                <h2 class="slide-title">المدرسة البنائية</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>أسسها <strong class="important-keyword">«فونت»</strong> وأشهر تلاميذه <strong class="important-keyword">«تشنير»</strong>.</li>
-                        <li>حددت موضوع علم النفس في دراسة <span class="important-keyword">الخبرة الداخلية الشعورية</span> المباشرة للفرد.</li>
-                        <li>أكدت على أن منهج <span class="important-keyword">الاستبطان</span> أو التأمل الباطني هو المنهج المناسب لدراسة الخبرة الداخلية الشعورية المباشرة، وتحليلها إلى عناصرها الأولية.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أمثلة على الخبرة الداخلية الشعورية:</p>
-                         <ul>
-                            <li>شعور الفرد <span class="important-keyword">بالسعادة</span> عندما ينجح في الامتحان.</li>
-                            <li>الشعور <span class="important-keyword">بالغضب</span> عند التعرض للإهانة.</li>
-                            <li>الإحساس <span class="important-keyword">بالراحة والاسترخاء</span> بعد يوم عمل شاق.</li>
-                            <li><span class="important-keyword">الخوف</span> من المستقبل المجهول.</li>
-                        </ul>
-                        <p class="font-bold mt-2">مثال على تطبيق الاستبطان:</p>
-                        <p>لو أن شخصًا يشعر <span class="important-keyword">بالقلق</span> والتوتر بسبب مشكلة ما في حياته، فإن الطريقة المناسبة لدراسة وفهم هذه الخبرة الداخلية الشعورية هي منهج <span class="important-keyword">الاستبطان</span> أو التأمل الباطني، فيمكن للشخص أن يجلس في هدوء ويتأمل مشاعره الداخلية، ويحاول تحليلها إلى عناصرها الأساسية؛ فقد يدرك أن قلقه ناتج عن خوفه من الفشل، أو شعوره بعدم الأمان، أو قلة ثقته بنفسه، أو توقعه لردود فعل سلبية من الآخرين.</p>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-sky-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-hourglass-half text-sky-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg"> علم النفس هو علم من العلوم <span class="highlight">الحديثة نسبيًا</span>، له <span class="highlight">ماض طويل</span>، لكن <span class="highlight">تاريخه العلمي قصير</span>. </p>
+                        <p class="text-gray-800 leading-relaxed mt-2 text-lg"> ظهر بمظهره العلمي الذي له موضوع واهتمامات محددة في <span class="highlight">الربع الأخير من القرن التاسع عشر</span>. </p>
                     </div>
                 </div>
-            </div>
-             <div id="slide10_content_schools_p3" class="slide">
-                <h2 class="slide-title">المدرسة السلوكية</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>أبرز أعلامها <strong class="important-keyword">«واطسون»</strong>.</li>
-                        <li>نظرت إلى علم النفس على أنه <span class="important-keyword">علم السلوك</span> الذي يمكن ملاحظته وقياسه.</li>
-                        <li>ركزت على <span class="important-keyword">السلوك</span> بوصفه موضوعًا لعلم النفس وليس على الشعور.</li>
-                        <li>ركزت على <span class="important-keyword">الملاحظة الموضوعية الخارجية</span> باعتبارها منهجًا أو طريقة لدراسة السلوك، بدلا من الاستبطان الذي يعتمد على الملاحظة الذاتية الداخلية.</li>
+                <div class="bg-amber-50 p-5 rounded-lg shadow mb-6">
+                    <h3 class="font-bold text-xl text-amber-700 mb-3 flex items-center"> <i class="fas fa-seedling ml-2 text-amber-600"></i> الجذور التاريخية لعلم النفس الحديث </h3>
+                    <ul class="space-y-3 text-gray-700 icon-list text-lg">
+                        <li> <i class="fas fa-landmark text-xs text-amber-500"></i> <span><span class="highlight">التراث الشرقي القديم</span> (<span class="highlight">الفرس</span> و<span class="highlight">الهنود</span>).</span> </li>
+                        <li> <i class="fas fa-university text-xs text-amber-500"></i> <span><span class="highlight">بلاد اليونان</span> (<span class="highlight">الإغريق</span>) وفلاسفتهم الكبار، وخاصة <span class="highlight">سقراط</span> و<span class="highlight">أفلاطون</span> و<span class="highlight">أرسطو</span>.</span> </li>
                     </ul>
                 </div>
             </div>
-            <div id="slide13_content_schools_p4" class="slide">
-                <h2 class="slide-title">مدرسة التحليل النفسي</h2>
-                <div class="text-shape">
-                    <ul>
-                        <li>مؤسسها <strong class="important-keyword">«فرويد»</strong>.</li>
-                        <li>أكدت أثر العوامل و<span class="important-keyword">الدوافع اللاشعورية</span> في سلوك الفرد.</li>
-                        <li>ترى أن ما يحكم السلوك الظاهري للفرد ويوجهه هو قوى داخلية، و<span class="important-keyword">غرائز بدائية</span>، ودوافع لا شعورية.</li>
-                        <li>أكدت على الأثر الخطير ل<span class="important-keyword">مرحلة الطفولة المبكرة</span> في تكوين وتشكيل شخصية الفرد.</li>
-                        <li>أضاف تلاميذ فرويد بعض الموضوعات، مثل الاهتمام بالعوامل الثقافية الاجتماعية إلى جانب العوامل اللاشعورية.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أمثلة على تأثير الدوافع اللاشعورية والطفولة:</p>
-                         <ul>
-                            <li><span class="important-keyword">الخوف من الفشل</span> يحفز الشخص على تجنب المخاطر بسبب غريزة الحفاظ على الذات.</li>
-                            <li><span class="important-keyword">الطموح الشخصي</span> يدفع الفرد للعمل بجد لتحقيق النجاح دون وعي كامل للدوافع العميقة.</li>
-                            <li><span class="important-keyword">القلق الاجتماعي</span> يجعل الشخص يتجنب المناسبات الاجتماعية نتيجة لدوافع لا شعورية للقبول.</li>
-                            <li>الأطفال الذين يحصلون على <span class="important-keyword">رعاية وحنان كافيين</span> في طفولتهم المبكرة يطوّرون شخصية مستقرة وثقة بالنفس.</li>
-                            <li>التعرض للتجارب العاطفية السلبية، مثل <span class="important-keyword">الإهمال</span> أو <span class="important-keyword">العنف</span> في الطفولة المبكرة، يمكن أن يؤدي إلى مشاكل عاطفية وصعوبات في بناء العلاقات.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div id="slide16_content_schools_p5" class="slide">
-                <h2 class="slide-title">مدرسة الجشطلت</h2>
-                <div class="text-shape">
-                    <p>من أبرز أعلامها <strong class="important-keyword">«فرتهيمر»</strong> و <strong class="important-keyword">«كوفكا»</strong> و <strong class="important-keyword">«كوهلر»</strong>.</p>
-                    <ul>
-                        <li>أكدت على أن <span class="important-keyword">إدراكنا للأشياء</span> يبدأ بإدراك <span class="important-keyword">الصيغة الكلية</span> لا بإدراك الأجزاء أو العناصر الجزئية؛ فنحن ندرك الوجه مثلا باعتباره شيئًا واحدًا وليس باعتباره مجموعة أجزاء؛ كالعين والأنف والأذن والفم، إلخ.</li>
-                        <li>يعني هذا أن <span class="important-keyword">الكل أكبر من مجموع الأجزاء</span>.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أمثلة على إدراك الصيغة الكلية:</p>
-                        <ul>
-                            <li>إدراك <span class="important-keyword">الوجه</span> باعتباره شيئًا واحدًا وليس باعتباره مجموعة من العيون والأنف والفم.</li>
-                            <li>إدراك <span class="important-keyword">الأغنية</span> باعتبارها كتلة متناغمة وليس باعتبارها مجموعة من النغمات والإيقاعات والكلمات المنفصلة.</li>
-                            <li>إدراك <span class="important-keyword">اللوحة الفنية</span> باعتبارها شيئًا واحدًا وليس باعتبارها مجموعة من الأشكال والألوان الفردية.</li>
-                            <li>فهم <span class="important-keyword">معنى الجملة</span> باعتبارها جملة وليس باعتبارها مجموعة من معاني الكلمات المنفصلة.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div id="slide17_content_schools_p6" class="slide">
-                 <h2 class="slide-title">المدرسة المعرفية</h2>
-                <div class="text-shape">
-                    <p>من أبرز أعلامها <strong class="important-keyword">«سكنر»</strong>، و<strong class="important-keyword">«إستير نبرج»</strong>، و <strong class="important-keyword">«دونالد»</strong>، و <strong class="important-keyword">«نورمان»</strong>، و <strong class="important-keyword">«أوزبل»</strong>.</p>
-                    <ul>
-                        <li>أكدت على وجود العديد من <span class="important-keyword">العمليات المعرفية العقلية</span> التي تتوسط المثير والاستجابة.</li>
-                        <li><span class="important-keyword">السلوك الإنساني</span> فيها ليس مجرد استجابة بسيطة لمنبهات بيئية، بل تتخلله عمليات إدراكية وانتباهية.</li>
-                         <li>استخدم أصحاب المدرسة المعرفية <span class="important-keyword">المنهج الموضوعي</span> في فهم العمليات المعرفية وأسس تكوين المعلومات.</li>
-                    </ul>
-                     <div class="example-card">
-                        <p class="font-bold">أمثلة على العمليات المعرفية:</p>
-                        <ul>
-                            <li>عندما يرى شخص ما إعلانًا تجاريًا على التلفاز، لا يقوم على الفور بشراء المنتج المعلن عنه؛ بدلا من ذلك، يقوم <span class="important-keyword">بمعالجة المعلومات</span> في الإعلان، ويقيم مدى حاجته للمنتج، ويقارنه بالمنتجات الأخرى، ثم يتخذ قراره بالشراء أو عدمه.</li>
-                            <li>عندما يسمع طالب محاضرةً في الفصل، لا يكتفي فقط بتلقي المعلومات سلبيًا؛ بل <span class="important-keyword">يركز انتباهه</span> على المحتوى المهم، ويربط المعلومات الجديدة بما يعرفه مسبقًا، ويدوّن الملاحظات، ويطرح الأسئلة للحصول على فهم أفضل للموضوع.</li>
-                            <li>عندما يسمع شخص صوت إنذار الحريق، لا يهرع مباشرة إلى الخروج بل <span class="important-keyword">يفكر</span> أولا هل هو إنذار حقيقي أم مجرد تدريب، ويتذكر مخارج الطوارئ، ويقرر أي طريق يسلك. هذه عمليات إدراكية وانتباهية تتوسط بين سماع الإنذار والاستجابة له.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        </div>
 
-            <div id="slide_quiz_section2" class="slide quiz-slide">
-                <h2 class="slide-title">اختبار مرحلي: أبرز مدارس واتجاهات علم النفس</h2>
-                 <div class="text-shape">
-                    <div id="quiz_section2_counter" class="quiz-question-counter"></div>
-                    <div id="quiz_section2_prompt" class="question-prompt-card"></div>
-                    <div id="quiz_section2_options" class="quiz-options" data-slideid="quiz_section2">
-                        </div>
-                    <div id="quiz_section2_feedback" class="feedback mt-4" aria-live="polite"></div>
-                    <button id="quiz_section2_next_q_btn" class="quiz-navigation-button" style="display: none;">السؤال التالي</button>
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="المرحلة الفلسفية" data-slide-category="مراحل تاريخية">
+            <div class="slide-header bg-gradient-to-br from-purple-600 via-pink-500 to-red-500">
+                <h1 class="text-3xl md:text-4xl font-bold">المرحلة الفلسفية (اليونانية القديمة)</h1>
+                <p class="mt-2 opacity-90 text-lg">دراسة النفس والروح كبداية</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-purple-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-scroll text-purple-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg"> اهتمت بدراسة <span class="highlight">ماهية النفس</span> ومعرفة حقيقتها. </p>
+                        <p class="text-gray-800 leading-relaxed mt-2 text-lg"> سميت هذه الدراسة من البداية باسم «<span class="highlight">علم النفس</span>». </p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <h3 class="font-bold text-xl text-purple-700 mb-3 flex items-center"> <i class="fas fa-lightbulb ml-2 text-purple-600"></i> مفاهيم أساسية في هذه المرحلة </h3>
+                    <ul class="space-y-3 text-gray-700 icon-list text-lg">
+                        <li><i class="fas fa-link text-xs text-purple-500"></i><span>ارتبط علم النفس في هذه المرحلة بـ<span class="highlight">النفس أو الروح</span>.</span></li>
+                        <li><i class="fas fa-fingerprint text-xs text-purple-500"></i><span>الروح في اعتقادهم هي <span class="highlight">مصدر السلوك</span>.</span></li>
+                        <li><i class="fas fa-search-plus text-xs text-purple-500"></i><span>فسروا من خلال مفهوم النفس أو الروح <span class="highlight">بواعث السلوك</span> من أحلام وتفكير وحس وإدراك وحركة.</span></li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-purple-300 shadow">
+                    <h3 class="font-semibold text-purple-700 text-lg mb-2"><i class="fas fa-users ml-2"></i>أبرز الفلاسفة</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2 text-center">
+                        <div class="bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow"><i class="fas fa-user-tie text-blue-500 text-2xl mb-1"></i><h4 class="font-bold text-blue-600">سقراط</h4></div>
+                        <div class="bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow"><i class="fas fa-user-graduate text-green-500 text-2xl mb-1"></i><h4 class="font-bold text-green-600">أفلاطون</h4></div>
+                        <div class="bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow"><i class="fas fa-book-open text-yellow-600 text-2xl mb-1"></i><h4 class="font-bold text-yellow-700">أرسطو</h4></div>
+                    </div>
                 </div>
             </div>
-            
-            <div id="slide_performance_summary" class="slide">
-                <h2 class="slide-title">ملخص الأداء</h2>
-                <div class="performance-summary-container">
-                    <h3>ملخص أدائك في الاختبارات المرحلية</h3>
-                    <div class="summary-section">
-                        <h4><i class="fas fa-check-circle text-green-500 mr-2"></i>المفاهيم التي أتقنتها:</h4>
-                        <ul id="strengthsList" class="strength">
-                            <li>سيتم عرض المفاهيم هنا...</li>
+        </div>
+        
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="المرحلة الفسيولوجية" data-slide-category="مراحل تاريخية">
+            <div class="slide-header bg-gradient-to-br from-green-600 via-lime-500 to-emerald-400">
+                <h1 class="text-3xl md:text-4xl font-bold">المرحلة الفسيولوجية</h1>
+                <p class="mt-2 opacity-90 text-lg">التحول نحو العلم التجريبي</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-green-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-dna text-green-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg"> بدأ علم النفس <span class="highlight">يستقل فعليًا عن الفلسفة</span> ويرتبط بعلم <span class="highlight">الفسيولوجيا</span> (علم وظائف الأعضاء). </p>
+                        <p class="text-gray-800 leading-relaxed mt-2 text-lg"> استفاد علم النفس من إمكانيات <span class="highlight">المنهج التجريبي</span> الذي كان مستخدمًا في هذه العلوم. </p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-sky-50 p-4 rounded-lg shadow mb-6 border-l-4 border-sky-300">
+                    <div class="bg-sky-100 p-3 rounded-full ml-4 shadow-inner"> <i class="fas fa-user-md text-sky-600 text-2xl"></i> </div>
+                    <div>
+                        <h3 class="font-bold text-xl text-sky-700">ولهلم فونت</h3>
+                        <p class="text-gray-700 text-lg"> من الرواد الأوائل الذين ساهموا في تحول علم النفس إلى المرحلة الفسيولوجية بفضل إسهاماته الرائدة. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="إسهامات فونت" data-slide-category="مراحل تاريخية">
+            <div class="slide-header bg-gradient-to-br from-amber-500 via-orange-500 to-red-500">
+                <h1 class="text-3xl md:text-4xl font-bold">المرحلة الفسيولوجية: إسهامات فونت</h1>
+                <p class="mt-2 opacity-90 text-lg">تأسيس علم النفس التجريبي</p>
+            </div>
+            <div class="slide-content">
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="font-bold text-xl text-amber-700 mb-3 flex items-center"> <i class="fas fa-flask ml-2 text-amber-600"></i> أبرز إسهامات <span class="highlight">فونت</span> في مجال الدراسات النفسية: </h3>
+                    <ul class="space-y-3 text-gray-700 icon-list text-lg">
+                        <li><i class="fas fa-microscope text-xs text-amber-500"></i><span>أنشأ <span class="highlight">أول معمل لعلم النفس التجريبي</span> في العالم بجامعة ليبزج بألمانيا عام <span class="highlight">١٨٧٩م</span>.</span></li>
+                        <li><i class="fas fa-brain text-xs text-amber-500"></i><span>كان الاهتمام فيه منصَبًا على إجراء <span class="highlight">تجارب نفس فسيولوجية</span> عن موضوعين مرتبطين ارتباطا واضحًا بالسلوك البشري، وهما <span class="highlight">الإحساس والإدراك</span>، بهدف دراسة <span class="highlight">عمليات التفكير أو الشعور</span>.</span></li>
+                        <li><i class="fas fa-book-open text-xs text-amber-500"></i><span>أسس مجلة <span class="highlight">«الدراسات الفلسفية»</span> عام <span class="highlight">١٨٨١م</span>.</span></li>
+                    </ul>
+                </div>
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border-l-4 border-amber-300 shadow">
+                    <h3 class="font-semibold text-amber-700 text-lg"><i class="fas fa-award ml-2"></i>مكانة فونت</h3>
+                    <p class="text-gray-700 mt-1 text-lg">يُعتبر <span class="highlight">فونت</span> "أب علم النفس التجريبي"، لدوره المحوري في تحويل دراسة النفس إلى علم قائم على التجربة والملاحظة الدقيقة.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="محاور بحوث فونت" data-slide-category="مراحل تاريخية">
+            <div class="slide-header bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500">
+                <h1 class="text-3xl md:text-4xl font-bold">المرحلة الفسيولوجية: محاور البحوث</h1>
+                <p class="mt-2 opacity-90 text-lg">مجالات البحث في معمل فونت</p>
+            </div>
+            <div class="slide-content">
+                <p class="text-gray-800 leading-relaxed text-lg mb-4"> تركزت البحوث التجريبية في معمل «فونت» التجريبي على ثلاثة محاور رئيسية هي: </p>
+                <div class="space-y-4">
+                    <div class="example-box border-l-4 border-rose-400 bg-rose-50">
+                        <h4 class="font-bold text-lg text-rose-700 mb-2 flex items-center"><i class="fas fa-hand-pointer ml-2"></i> <span class="highlight">عمليات الإدراك الحسي</span></h4>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 text-md">
+                            <li>لمس سطح ما (منبه حسي) يتم إدراكه على أنه ناعم، خشن، بارد ساخن، إلخ.</li>
+                            <li>رؤية لوحة فنية (منبه حسي) يتم إدراكها على أنها ألوان زاهية، أشكال هندسية، منظر طبيعي، إلخ.</li>
                         </ul>
                     </div>
-                    <div class="summary-section">
-                        <h4><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>المفاهيم التي تحتاج إلى مراجعة:</h4>
-                        <ul id="weaknessesList" class="weakness">
-                            <li>سيتم عرض المفاهيم هنا...</li>
+                    <div class="example-box border-l-4 border-pink-400 bg-pink-50">
+                        <h4 class="font-bold text-lg text-pink-700 mb-2 flex items-center"><i class="fas fa-heartbeat ml-2"></i> <span class="highlight">الطبيعة النفسية</span></h4>
+                        <p class="text-gray-700 mb-1 text-md">وهي أحد فروع علم النفس التي تهتم بدراسة العلاقة بين المثيرات الحسية والاستجابات أو ردود الأفعال الناتجة عنها.</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 text-md">
+                            <li>دراسة العلاقة بين درجة حرارة الغرفة وشعور الشخص بالراحة.</li>
+                            <li>متابعة رد فعل الشخص عند سماع موسيقى صاخبة (الانزعاج أو الحماس).</li>
                         </ul>
                     </div>
-                     <div class="flex justify-center mt-6">
-                        <button id="proceedToFinalAssessmentBtn" class="quiz-navigation-button">الانتقال إلى التقويم النهائي</button>
+                    <div class="example-box border-l-4 border-fuchsia-400 bg-fuchsia-50">
+                        <h4 class="font-bold text-lg text-fuchsia-700 mb-2 flex items-center"><i class="fas fa-stopwatch ml-2"></i> <span class="highlight">دراسة زمن الرجع</span></h4>
+                        <p class="text-gray-700 mb-1 text-md">وهو الفاصل الزمني الذي يفصل بين ظهور المثير وحدوث الاستجابة.</p>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1 text-md">
+                            <li>الوقت بين رؤية إشارة المرور الحمراء والضغط على فرامل السيارة.</li>
+                            <li>المدة بين سماع صافرة البداية وانطلاق العداء في سباق.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="مرحلة الاستقلال" data-slide-category="مراحل تاريخية" id="historical-stages-end">
+            <div class="slide-header bg-gradient-to-br from-blue-600 via-indigo-500 to-violet-500">
+                <h1 class="text-3xl md:text-4xl font-bold">مرحلة الاستقلال</h1>
+                <p class="mt-2 opacity-90 text-lg">علم النفس كعلم مستقل بذاته</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-indigo-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-flag-checkered text-indigo-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg"> عارض بعض العلماء ارتباط علم النفس بعلم الفسيولوجيا، وعلم البيولوجيا. </p>
+                        <p class="text-gray-800 leading-relaxed mt-2 text-lg"> ظهرت بعض الحجج القوية التي كان لها أثر عميق بعد ذلك في <span class="highlight">استقلال علم النفس موضوعًا ومنهجًا</span>. </p>
+                    </div>
+                </div>
+                <div class="mb-6 p-4 bg-violet-50 rounded-lg border-l-4 border-violet-300">
+                    <h3 class="font-bold text-xl text-violet-700 mb-3 flex items-center"> <i class="fas fa-microscope ml-2 text-violet-600"></i> خصائص مرحلة الاستقلال: </h3>
+                    <ul class="space-y-3 text-gray-700 icon-list text-lg">
+                        <li><i class="fas fa-eye text-xs text-violet-500"></i><span>أصبح موضوع علم النفس هو <span class="highlight">السلوك الظاهري</span>.</span></li>
+                        <li><i class="fas fa-vial text-xs text-violet-500"></i><span>أصبح منهجه هو <span class="highlight">الملاحظة والتجربة</span>.</span></li>
+                    </ul>
+                </div>
+                <h4 class="font-bold text-lg text-gray-700 mb-2">أمثلة توضيحية:</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="example-box"><p><i class="fas fa-users ml-1 text-green-600"></i> دراسة أسباب تفضيل بعض الطلاب للدراسة الفردية بدلا من الجماعية من خلال استبيانات وملاحظات سلوكية.</p></div>
+                    <div class="example-box"><p><i class="fas fa-flask ml-1 text-green-600"></i> قام الباحث «سكينر» بدراسة عملية التعلم عند الحيوانات باستخدام التجارب المعملية؛ مما أدى إلى تطوير نظرية التعلم بالتعزيز.</p></div>
+                    <div class="example-box col-span-1 md:col-span-2"><p><i class="fas fa-mobile-alt ml-1 text-green-600"></i> فهم ظاهرة إدمان وسائل التواصل الاجتماعي من خلال دراسة أنماط استخدام الهواتف الذكية وتأثيرها على السلوك اليومي للأفراد.</p></div>
+                </div>
+            </div>
+        </div>
 
-            <div id="slide_assessment_prompt" class="slide">
-                <h2 class="slide-title">التقويم النهائي</h2>
-                <div class="text-shape">
-                    <p class="text-center text-xl mb-4">لقد أكملت جميع أجزاء الدرس بنجاح!</p>
-                    <p class="text-center mb-6">يمكنك الآن عرض ملخص لأدائك أو الانتقال مباشرة إلى التقويم النهائي.</p>
-                    <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
-                        <button id="showPerformanceSummaryBtn" class="summary-button text-lg px-6 py-2.5">عرض ملخص الأداء</button>
-                        <button id="startFinalAssessmentBtn" class="quiz-navigation-button text-lg px-6 py-2.5">بدء التقويم النهائي</button>
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="المدرسة البنائية" data-slide-category="مدارس علم النفس">
+            <div class="slide-header bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-600">
+                <h1 class="text-3xl md:text-4xl font-bold">المدرسة البنائية</h1>
+                <p class="mt-2 opacity-90 text-lg">دراسة الخبرة الداخلية الشعورية</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-amber-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-cubes text-amber-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg">أسسها «<span class="highlight">فونت</span>» وأشهر تلاميذه «<span class="highlight">تشنير</span>».</p>
+                        <p class="text-gray-800 leading-relaxed mt-1 text-lg">حددت موضوع علم النفس في دراسة <span class="highlight">الخبرة الداخلية الشعورية المباشرة</span> للفرد.</p>
+                    </div>
+                </div>
+                <h3 class="font-bold text-xl text-amber-700 mb-3 flex items-center"><i class="fas fa-quote-left ml-2 text-amber-600"></i> أمثلة على الخبرة الداخلية الشعورية:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="example-box border-l-4 border-yellow-400 bg-yellow-50"><p><i class="fas fa-smile-beam ml-1 text-yellow-600"></i> شعور الفرد بالسعادة عندما ينجح في الامتحان.</p></div>
+                    <div class="example-box border-l-4 border-red-400 bg-red-50"><p><i class="fas fa-angry ml-1 text-red-600"></i> الشعور بالغضب عند التعرض للإهانة.</p></div>
+                    <div class="example-box border-l-4 border-green-400 bg-green-50"><p><i class="fas fa-couch ml-1 text-green-600"></i> الإحساس بالراحة والاسترخاء بعد يوم عمل شاق.</p></div>
+                    <div class="example-box border-l-4 border-purple-400 bg-purple-50"><p><i class="fas fa-question ml-1 text-purple-600"></i> الخوف من المستقبل المجهول.</p></div>
+                </div>
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border-l-4 border-amber-300 shadow">
+                    <h3 class="font-semibold text-amber-700 text-lg mb-2 flex items-center"><i class="fas fa-search-location ml-2"></i> منهج الاستبطان</h3>
+                    <p class="text-gray-700 mb-2 text-lg">أكدت على أن منهج <span class="highlight">الاستبطان أو التأمل الباطني</span> هو المنهج المناسب لدراسة الخبرة الداخلية الشعورية المباشرة، وتحليلها إلى عناصرها الأولية.</p>
+                    <div class="example-box border-l-4 border-teal-400 bg-teal-50 mt-2 p-3">
+                        <h4 class="font-semibold text-teal-700 mb-1 flex items-center"><i class="fas fa-user-astronaut ml-2"></i> مثال تطبيقي:</h4>
+                        <p class="text-gray-700 text-md">لو أن شخصًا يشعر بالقلق والتوتر بسبب مشكلة ما في حياته، فإن الطريقة المناسبة لدراسة وفهم هذه الخبرة الداخلية الشعورية هي منهج الاستبطان. يمكن للشخص أن يجلس في هدوء ويتأمل مشاعره الداخلية، ويحاول تحليلها إلى عناصرها الأساسية؛ فقد يدرك أن قلقه ناتج عن خوفه من الفشل، أو شعوره بعدم الأمان، أو قلة ثقته بنفسه، أو توقعه لردود فعل سلبية من الآخرين.</p>
                     </div>
                 </div>
             </div>
-
-            <div id="slide_final_assessment_quiz" class="slide quiz-slide">
-                <h2 class="slide-title">التقويم النهائي التكيفي</h2>
-                 <div class="text-shape">
-                    <div id="final_quiz_counter" class="quiz-question-counter"></div>
-                    <div id="final_quiz_prompt" class="question-prompt-card"></div>
-                    <div id="final_quiz_options" class="quiz-options" data-slideid="final_quiz">
-                        </div>
-                    <div id="final_quiz_feedback" class="feedback mt-4" aria-live="polite"></div>
-                    <button id="final_quiz_next_q_btn" class="quiz-navigation-button" style="display: none;">السؤال التالي</button>
+        </div>
+        
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="المدرسة السلوكية" data-slide-category="مدارس علم النفس">
+            <div class="slide-header bg-gradient-to-br from-red-500 via-rose-500 to-pink-600">
+                <h1 class="text-3xl md:text-4xl font-bold">المدرسة السلوكية</h1>
+                <p class="mt-2 opacity-90 text-lg">دراسة السلوك الملاحظ والقابل للقياس</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-rose-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-running text-rose-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg">أبرز أعلامها «<span class="highlight">واطسون</span>».</p>
+                        <p class="text-gray-800 leading-relaxed mt-1 text-lg">نظرت إلى علم النفس على أنه <span class="highlight">علم السلوك الذي يمكن ملاحظته وقياسه</span>.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="p-4 bg-red-50 rounded-lg border-l-4 border-red-300 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-xl text-red-700 mb-2 flex items-center"><i class="fas fa-bullseye ml-2"></i> موضوع الدراسة</h3>
+                        <p class="text-gray-700 text-lg">ركزت على <span class="highlight">السلوك</span> بوصفه موضوعًا لعلم النفس وليس على الشعور.</p>
+                    </div>
+                    <div class="p-4 bg-pink-50 rounded-lg border-l-4 border-pink-300 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-xl text-pink-700 mb-2 flex items-center"><i class="fas fa-binoculars ml-2"></i> المنهج العلمي</h3>
+                        <p class="text-gray-700 text-lg">ركزت على <span class="highlight">الملاحظة الموضوعية الخارجية</span> باعتبارها منهجًا أو طريقة لدراسة السلوك، بدلا من الاستبطان الذي يعتمد على الملاحظة الذاتية الداخلية.</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-red-50 to-pink-50 p-4 rounded-lg border-l-4 border-red-200 shadow">
+                    <h3 class="font-semibold text-red-700 text-lg mb-2 flex items-center"><i class="fas fa-child ml-2"></i> تجربة واطسون الشهيرة</h3>
+                    <p class="text-gray-700 text-lg">أجرى واطسون تجربة "ألبرت الصغير" حيث أثبت إمكانية تكييف السلوك (الخوف) من خلال التجربة والتعلم الشرطي.</p>
                 </div>
             </div>
-            
-            <div id="slide_final_thanks" class="slide">
-                <h2 class="slide-title">شكرًا جزيلاً</h2>
-                <div class="text-shape">
-                    <p class="text-center text-xl">نشكركم على متابعتكم وإكمالكم لهذه الوحدة التعليمية في علم النفس!</p>
-                     <img src="https://placehold.co/600x300/10b981/ffffff?text=نهاية+الدرس&font=lalezar" alt="صورة ختامية معبرة عن الشكر" class="slide-image" onerror="this.onerror=null;this.src='https://placehold.co/600x300/10b981/ffffff?text=خطأ+في+تحميل+الصورة&font=almarai';">
-                    <p class="text-center mt-4">نتمنى أن تكونوا قد استفدتم وأصبح لديكم فهم أعمق لمبادئ علم النفس.</p>
+        </div>
+
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="التحليل النفسي" data-slide-category="مدارس علم النفس">
+            <div class="slide-header bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500">
+                <h1 class="text-3xl md:text-4xl font-bold">مدرسة التحليل النفسي</h1>
+                <p class="mt-2 opacity-90 text-lg">استكشاف الدوافع اللاشعورية</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-purple-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-brain text-purple-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg">مؤسسها «<span class="highlight">فرويد</span>».</p>
+                        <p class="text-gray-800 leading-relaxed mt-1 text-lg">أكدت أثر <span class="highlight">العوامل والدوافع اللاشعورية</span> في سلوك الفرد.</p>
+                    </div>
+                </div>
+                <div class="mb-6 p-4 bg-violet-50 rounded-lg border-l-4 border-violet-300">
+                    <h3 class="font-bold text-xl text-violet-700 mb-2 flex items-center"><i class="fas fa-user-secret ml-2"></i> الدوافع اللاشعورية</h3>
+                    <p class="text-gray-700 mb-3 text-lg">ترى أن ما يحكم السلوك الظاهري للفرد ويوجهه هو <span class="highlight">قوى داخلية</span>، و<span class="highlight">غرائز بدائية</span>، و<span class="highlight">دوافع لا شعورية</span>.</p>
+                    <div class="space-y-2">
+                        <div class="example-box text-sm"><p><i class="fas fa-shield-alt ml-1 text-purple-500"></i> الخوف من الفشل يحفز الشخص على تجنب المخاطر بسبب غريزة الحفاظ على الذات.</p></div>
+                        <div class="example-box text-sm"><p><i class="fas fa-trophy ml-1 text-yellow-500"></i> الطموح الشخصي يدفع الفرد للعمل بجد لتحقيق النجاح دون وعي كامل للدوافع العميقة.</p></div>
+                        <div class="example-box text-sm"><p><i class="fas fa-users-slash ml-1 text-red-500"></i> القلق الاجتماعي يجعل الشخص يتجنب المناسبات الاجتماعية نتيجة لدوافع لا شعورية للقبول.</p></div>
+                    </div>
+                </div>
+                <div class="mb-6 p-4 bg-fuchsia-50 rounded-lg border-l-4 border-fuchsia-300">
+                    <h3 class="font-bold text-xl text-fuchsia-700 mb-2 flex items-center"><i class="fas fa-baby-carriage ml-2"></i> تأثير الطفولة المبكرة</h3>
+                    <p class="text-gray-700 mb-3 text-lg">أكدت على الأثر الخطير لـ<span class="highlight">مرحلة الطفولة المبكرة</span> في تكوين وتشكيل شخصية الفرد.</p>
+                    <div class="space-y-2">
+                        <div class="example-box text-sm"><p><i class="fas fa-heart ml-1 text-green-500"></i> الأطفال الذين يحصلون على رعاية وحنان كافيين في طفولتهم المبكرة يطوّرون شخصية مستقرة وثقة بالنفس.</p></div>
+                        <div class="example-box text-sm"><p><i class="fas fa-sad-tear ml-1 text-red-500"></i> التعرض للتجارب العاطفية السلبية، مثل الإهمال أو العنف في الطفولة المبكرة، يمكن أن يؤدي إلى مشاكل عاطفية وصعوبات في بناء العلاقات.</p></div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-purple-50 to-fuchsia-50 p-4 rounded-lg border-l-4 border-purple-200 shadow">
+                    <h3 class="font-semibold text-purple-700 text-lg mb-2 flex items-center"><i class="fas fa-users-cog ml-2"></i> تطور المدرسة</h3>
+                    <p class="text-gray-700 text-lg">أضاف تلاميذ فرويد بعض الموضوعات، مثل الاهتمام بالعوامل الثقافية الاجتماعية إلى جانب العوامل اللاشعورية.</p>
                 </div>
             </div>
-            
-            <div class="progress-bar-container">
-                <div id="progressBar" class="progress-bar"></div>
-            </div>
+        </div>
 
-        </div> 
-    </div> 
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="مدرسة الجشطلت" data-slide-category="مدارس علم النفس">
+            <div class="slide-header bg-gradient-to-br from-emerald-500 via-green-500 to-lime-600">
+                <h1 class="text-3xl md:text-4xl font-bold">مدرسة الجشطلت</h1>
+                <p class="mt-2 opacity-90 text-lg">الإدراك الكلي: "الكل أكبر من مجموع الأجزاء"</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-green-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-puzzle-piece text-green-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg">من أبرز أعلامها «<span class="highlight">فرتهيمر</span>» و «<span class="highlight">كوفكا</span>» و«<span class="highlight">كوهلر</span>».</p>
+                        <p class="text-gray-800 leading-relaxed mt-1 text-lg">أكدت على أن إدراكنا للأشياء يبدأ بإدراك <span class="highlight">الصيغة الكلية</span> لا بإدراك الأجزاء أو العناصر الجزئية.</p>
+                    </div>
+                </div>
+                <div class="mb-6 p-4 bg-emerald-50 rounded-lg border-l-4 border-emerald-300">
+                    <h3 class="font-bold text-xl text-emerald-700 mb-2 flex items-center"><i class="fas fa-shapes ml-2"></i> مبدأ الجشطلت الأساسي</h3>
+                    <p class="text-gray-700 text-lg">يعني هذا أن <span class="highlight">الكل أكبر من مجموع الأجزاء</span>.</p>
+                </div>
+                <h4 class="font-bold text-lg text-gray-700 mb-2">أمثلة على الإدراك الكلي:</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="example-box"><p><i class="fas fa-user-circle ml-1 text-blue-500"></i> إدراك الوجه باعتباره شيئًا واحدًا وليس مجموعة من العيون والأنف والفم.</p></div>
+                    <div class="example-box"><p><i class="fas fa-music ml-1 text-purple-500"></i> إدراك الأغنية باعتبارها كتلة متناغمة وليس مجموعة من النغمات والإيقاعات والكلمات.</p></div>
+                    <div class="example-box"><p><i class="fas fa-palette ml-1 text-orange-500"></i> إدراك اللوحة الفنية ككل متكامل وليس مجموعة أشكال وألوان فردية.</p></div>
+                    <div class="example-box"><p><i class="fas fa-comment-dots ml-1 text-teal-500"></i> فهم معنى الجملة ككل وليس كمجموعة معاني كلمات منفصلة.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="المدرسة المعرفية" data-slide-category="مدارس علم النفس" id="schools-of-psychology-end">
+            <div class="slide-header bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-600">
+                <h1 class="text-3xl md:text-4xl font-bold">المدرسة المعرفية</h1>
+                <p class="mt-2 opacity-90 text-lg">دور العمليات العقلية في السلوك</p>
+            </div>
+            <div class="slide-content">
+                <div class="flex items-start mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-blue-100 p-3 rounded-full ml-4 shadow"> <i class="fas fa-cogs text-blue-600 text-2xl"></i> </div>
+                    <div>
+                        <p class="text-gray-800 leading-relaxed text-lg">من أبرز أعلامها «<span class="highlight">سكنر</span>»، و«<span class="highlight">إستيرنبرج</span>»، و «<span class="highlight">دونالد نورمان</span>»، و«<span class="highlight">أوزبل</span>».</p>
+                        <p class="text-gray-800 leading-relaxed mt-1 text-lg">أكدت على وجود العديد من <span class="highlight">العمليات المعرفية العقلية</span> التي تتوسط المثير والاستجابة.</p>
+                    </div>
+                </div>
+                <div class="mb-6 p-4 bg-sky-50 rounded-lg border-l-4 border-sky-300">
+                    <h3 class="font-bold text-xl text-sky-700 mb-3 flex items-center"><i class="fas fa-brain ml-2"></i> مبادئ المدرسة المعرفية:</h3>
+                    <ul class="space-y-3 text-gray-700 icon-list text-lg">
+                        <li><i class="fas fa-exchange-alt text-xs text-sky-500"></i><span>السلوك الإنساني فيها ليس مجرد استجابة بسيطة لمنبهات بيئية، وإنما هناك العديد من <span class="highlight">العمليات الإدراكية والانتباهية</span> التي يتضمنها.</span></li>
+                        <li><i class="fas fa-search text-xs text-sky-500"></i><span>استخدم أصحاب المدرسة المعرفية <span class="highlight">المنهج الموضوعي</span> في فهم العمليات المعرفية وأسس تكوين المعلومات.</span></li>
+                    </ul>
+                </div>
+                <h4 class="font-bold text-lg text-gray-700 mb-2">أمثلة تطبيقية:</h4>
+                <div class="space-y-3">
+                    <div class="example-box"><p><i class="fas fa-tv ml-1 text-blue-500"></i> عندما يرى شخص إعلانًا تجاريًا، يقوم بمعالجة المعلومات، يقيم حاجته للمنتج، يقارنه بغيره، ثم يقرر الشراء.</p></div>
+                    <div class="example-box"><p><i class="fas fa-user-graduate ml-1 text-green-500"></i> عندما يسمع طالب محاضرة، يركز انتباهه، يربط المعلومات الجديدة بما يعرفه، يدوّن ملاحظات، ويطرح أسئلة.</p></div>
+                    <div class="example-box"><p><i class="fas fa-fire-extinguisher ml-1 text-red-500"></i> عند سماع إنذار حريق، يفكر الشخص (هل هو حقيقي؟)، يتذكر مخارج الطوارئ، ويقرر أي طريق يسلك.</p></div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
     <script>
-        // --- Application State ---
-        let currentSlideIndex = 0;
-        let currentLessonPart = 0; // 0: Intro, 1: Origin Content, 11: Origin Quiz, 2: Schools Content, 22: Schools Quiz, 3: Perf Summary Prompt, 33: Perf Summary Display, 4: Final Assessment Quiz, 5: Thanks
-        let currentQuiz = null; 
-        let userMistakesLog = []; 
-        const MASTERY_THRESHOLD = 0.8; 
-        const SECTION_QUIZ_QUESTION_COUNT = 10; 
-        const FINAL_ASSESSMENT_QUESTION_COUNT = 20; 
+        const GEMINI_API_KEY = "AIzaSyChIOxuTAmBVpUddd3u77335X-GjnSn12Y"; 
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        // --- DOM Elements ---
-        const slides = document.querySelectorAll('.slide');
-        const progressBar = document.getElementById('progressBar');
-        const presentationContainer = document.querySelector('.presentation-container');
-        const startLessonBtn = document.getElementById('startLessonBtn');
-        const showPerformanceSummaryBtn = document.getElementById('showPerformanceSummaryBtn');
-        const proceedToFinalAssessmentBtn = document.getElementById('proceedToFinalAssessmentBtn');
+        const questionBank = [
+            // --- المراحل التاريخية ---
+            { id: "qb_hist_01", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "ساهم هذا العالم في مجال الطبيعة النفسية. الطبيعة النفسية هي أحد فروع علم النفس الذي يدرس العلاقة بين المثيرات الحسية والاستجابات أو ردود الأفعال الناتجة عنها. تناقش المقولة السابقة أحد أعمال...", options: [{text:"ويليام جيمس"}, {text:"إدوارد تيتشنر"}, {text:"جون واطسون"}, {text:"فيلهلم فونت", isCorrect:true}] },
+            { id: "qb_hist_02", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "مرحلة الاستقلالية", text: "لم تَعُد التأمُّلات الفلسفية كافية لمعرفة النفس البشرية؛ ولذلك اتجه العلماء إلى استخدام الوسائل العلمية الدقيقة، كالملاحظة والتجريب والقياس، للتوصُّل إلى نتائج يُمكِن اعتمادها بدرجة عالية من الصدق والثقة. تُشير العبارة السابقة إلى إحدى مراحل تطوُّر علم النفس، وهي المرحلة...", options: [{text:"الفسيولوجية"}, {text:"الفلسفية"}, {text:"الاستقلالية", isCorrect:true}, {text:"الانتقالية"}] },
+            { id: "qb_hist_03", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "انتقل علماء النفس إلى هذه المرحلة من مراحل التطوُّر؛ لأنهم أرادوا أن يستفيدوا من المنهجيات العلمية التي كانت مُستخدمة في العلوم التطبيقية. تُشير العبارة السابقة إلى إحدى مراحل تطوُّر علم النفس، وهي...", options: [{text:"المرحلة الفلسفية"}, {text:"المرحلة النفسية"}, {text:"المرحلة الفسيولوجية", isCorrect:true}, {text:"مرحلة الاستقلال"}] },
+            { id: "qb_hist_04", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفلسفية", text: "في هذه المرحلة من التطوُّر، اهتم علم النفس بدراسة ماهية النفس ومعرفة حقيقتها. تصف العبارة السابقة إحدى مراحل تطوُّر علم النفس، وهي...", options: [{text:"المرحلة السلوكية"}, {text:"المرحلة النفسية"}, {text:"مرحلة الاستقلال"}, {text:"المرحلة الفلسفية", isCorrect:true}] },
+            { id: "qb_hist_05", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "بحث بافلوف في الوظائف العقلية وعلاقتها بالمحفزات البيئية، كالتفاعلات العضوية في الجسم وارتباطها بردود الفعل السلوكية للفرد. تعكس هذه الدراسة ظهور علم النفس في المرحلة...", options: [{text:"الفسيولوجية", isCorrect:true}, {text:"الاستقلالية"}, {text:"الفلسفية"}, {text:"التأملية"}] },
+            { id: "qb_hist_06", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "زمن الرجع (فونت)", text: "في إحدى التجارب النفسية، تم توجيه مجموعة من المشاركين للاستجابة لمحفِّز سمعي محدَّد عن طريق الضغط على زر معين، ومع تكرار هذه التجربة، لوحظ تحسُّن ملحوظ في سرعة استجابة المشاركين وتفاعُلهم مع المحفز الصوتي. توضح تلك التجربة أحد محاور فونت في المعمل، وهو...", options: [{text:"زمن الرجع", isCorrect:true}, {text:"الطبيعة النفسية"}, {text:"الإدراك الحسي"}, {text:"الإدراك العقلي"}] },
+            { id: "qb_hist_07", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "زمن الرجع (فونت)", text: "أجرى فونت في معمله تجارب استهدفت الكشف عن كفاءة وسرعة أداء العمليات والوظائف العقلية العليا؛ حيث أعطى المفحوص تعليمات أن منبهًا محددًا، كالضوء الأحمر، سيعرض أمامه، ومهمته أن يستجيب بأسرع ما يمكن، كأن يضغط على زر أو مفتاح معين يوقف به الضوء. تُعَد العبارة السابقة تطبيقًا لأحد المحاور التي تضمَّنتها دراسات فونت، وهو...", options: [{text:"زمن الرجع", isCorrect:true}, {text:"الوعي والشعور"}, {text:"الطبيعة النفسية"}, {text:"الإدراك الحسي"}] },
+            { id: "qb_hist_08", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفلسفية", text: "يرى الغزالي أن الروح كيان معنوي مستقل، وهي مصدر الطاقة الدافعة للبشر. يتفق القول السابق مع إحدى مراحل علم النفس، وهي المرحلة...", options: [{text:"الفلسفية", isCorrect:true}, {text:"الاستقلالية"}, {text:"الاستنباطية"}, {text:"الفسيولوجية"}] },
+            { id: "qb_hist_09", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "تشير نظرية الأنماط الجسدية إلى وجود ارتباط بين شكل جسم الفرد وسماته الشخصية... يشير ما سبق إلى إحدى مراحل علم النفس، وهي المرحلة...", options: [{text:"التأملية"}, {text:"الاستقلالية"}, {text:"الفلسفية"}, {text:"الفسيولوجية", isCorrect:true}] },
+            { id: "qb_hist_10", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "ولهلم فونت هو أحد الرواد الذين ساهموا في تحويل علم النفس إلى هذه المرحلة من مراحل تطوره. تشير العبارة السابقة إلى...", options: [{text:"المرحلة الفلسفية"}, {text:"المرحلة الفسيولوجية", isCorrect:true}, {text:"مرحلة الاستقلال"}, {text:"المرحلة الاجتماعية"}] },
+            { id: "qb_hist_11", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "مرحلة الاستقلالية", text: "أكد بعض علماء النفس أن السلوك الظاهر هو الأساس الذي يتم من خلاله قياس وفهم سلوك الإنسان، وكيفية تفاعله مع بيئته الداخلية والخارجية. تشير العبارة السابقة إلى إحدى مراحل نشأة علم النفس، وهي المرحلة...", options: [{text:"التأملية"}, {text:"الفلسفية"}, {text:"الاستقلالية", isCorrect:true}, {text:"الفسيولوجية"}] },
+            { id: "qb_hist_12", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "مرحلة الاستقلالية", text: "السلوك الإنساني ظاهرة معقَّدة... يمكن القول إن السلوك الإنساني يخضع لمبادئ وقوانين مثل الظواهر الطبيعية. تشير تلك الفكرة إلى طبيعة الدراسة في علم النفس في المرحلة...", options: [{text:"الفسيولوجية"}, {text:"الفلسفية"}, {text:"الوضعية"}, {text:"الاستقلالية", isCorrect:true}] },
+            { id: "qb_hist_13", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "في عام ١٨٧٩، أنشأ هذا العالِم أول معمل لعلم النفس التجريبي في العالَم بجامعة ليبزج الألمانية. تُشير هذه العبارة إلى...", options: [{text:"ولهلم فونت", isCorrect:true}, {text:"إميل دوركايم"}, {text:"هربرت سبنسر"}, {text:"سيجموند فرويد"}] }, // Corrected year from 1978 to 1879 as per slide 6 text.
+            { id: "qb_hist_14", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "المرحلة الفسيولوجية", text: "أوضحت الدراسات أن المخيخ... يؤثر بشكل كبير في التناسق الحركي والتوازن... تعكس هذه الدراسة ظهور علم النفس في المرحلة...", options: [{text:"التأملية"}, {text:"الاستقلالية"}, {text:"الفلسفية"}, {text:"الفسيولوجية", isCorrect:true}] },
+            { id: "qb_hist_15", slideTitle: "سؤال", category: "مراحل تاريخية", topic: "مرحلة الاستقلالية", text: "في هذه المرحلة من مراحل تطور علم النفس، عارض علماء النفس ارتباط علم النفس بعلم الفيسولوجي وعلم البيولوجي. ونظروا إليه باعتباره علمًا قائمًا بذاته. تشير العبارة السابقة إلى إحدى مراحل تطور علم النفس، وهي...", options: [{text:"المرحلة الاجتماعية"}, {text:"المرحلة الفلسفية"}, {text:"مرحلة الاستقلال", isCorrect:true}, {text:"المرحلة الفسيولوجية"}] },
 
-
-        // --- Touch Swipe Variables ---
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const swipeThreshold = 50; 
-
-        // --- All Questions Bank ---
-        const allQuestions = [
-            // Section 1: نشأة علم النفس وتطوُّره (10 أسئلة للاختبار المرحلي)
-            { id: "Q001_Origin", section: "origin", text: "في أي مرحلة ارتبط علم النفس بدراسة ماهية النفس ومعرفة حقيقتها؟", options: ["أ) المرحلة الفسيولوجية", "ب) المرحلة الفلسفية", "ج) مرحلة الاستقلال"], correctOptionIndex: 1, topic: "المرحلة الفلسفية", knowledgeContext: "المرحلة الفلسفية التي اهتمت بدراسة ماهية النفس ومعرفة حقيقتها. راجع الشريحة الخاصة بالمرحلة الفلسفية (اليونانية القديمة)." },
-            { id: "Q002_Origin", section: "origin", text: "من هو العالم الذي أنشأ أول معمل لعلم النفس التجريبي عام ١٨٧٩م؟", options: ["أ) سقراط", "ب) جون لوك", "ج) فلهلم فونت", "د) فرويد"], correctOptionIndex: 2, topic: "المرحلة الفسيولوجية", knowledgeContext: "فلهلم فونت هو مؤسس أول معمل تجريبي لعلم النفس. راجع الشريحة الخاصة بالمرحلة الفسيولوجية." },
-            { id: "Q003_Origin", section: "origin", text: "في مرحلة الاستقلال، أصبح موضوع علم النفس الأساسي هو:", options: ["أ) دراسة الروح", "ب) تحليل الشعور", "ج) السلوك الظاهري", "د) وظائف الأعضاء"], correctOptionIndex: 2, topic: "مرحلة الاستقلال", knowledgeContext: "مرحلة الاستقلال التي ركزت على السلوك الظاهري القابل للملاحظة والتجربة. راجع الشريحة الخاصة بمرحلة الاستقلال." },
-            { id: "124195978473", section: "origin", text: "لم تَعُد التأمُّلات الفلسفية كافية لمعرفة النفس البشرية؛ ولذلك اتجه العلماء إلى استخدام الوسائل العلمية الدقيقة، كالملاحظة والتجريب والقياس، للتوصُّل إلى نتائج يُمكِن اعتمادها بدرجة عالية من الصدق والثقة. تُشير العبارة السابقة إلى إحدى مراحل تطوُّر علم النفس، وهي المرحلة:", options: ["أ) الفسيولوجية", "ب) الفلسفية", "ج) الاستقلالية", "د) الانتقالية"], correctOptionIndex: 2, topic: "مرحلة الاستقلالية", knowledgeContext: "هذه العبارة تصف مرحلة الاستقلالية، حيث بدأ علم النفس يعتمد على المنهج العلمي كالملاحظة والتجريب. راجع الشريحة 'مرحلة الاستقلال'." },
-            { id: "305163738947", section: "origin", text: "يرى الغزالي أن الروح كيان معنوي مستقل، وهي مصدر الطاقة الدافعة للبشر. يتفق القول السابق مع إحدى مراحل علم النفس، وهي المرحلة:", options: ["أ) الفلسفية", "ب) الاستقلالية", "ج) الاستنباطية", "د) الفسيولوجية"], correctOptionIndex: 0, topic: "المرحلة الفلسفية", knowledgeContext: "اعتبار الروح كيانًا معنويًا مستقلاً ومصدرًا للسلوك هو من سمات المرحلة الفلسفية لعلم النفس. راجع الشريحة 'المرحلة الفلسفية (اليونانية القديمة)'." },
-            { id: "385121394865", section: "origin", text: "ولهلم فونت هو أحد الرواد الذين ساهموا في تحويل علم النفس إلى هذه المرحلة من مراحل تطوره. تشير العبارة السابقة إلى:", options: ["أ) المرحلة الفلسفية", "ب) المرحلة الفسيولوجية", "ج) مرحلة الاستقلال", "د) المرحلة الاجتماعية"], correctOptionIndex: 1, topic: "المرحلة الفسيولوجية", knowledgeContext: "فلهلم فونت ودوره في المرحلة الفسيولوجية. راجع الشريحة 'المرحلة الفسيولوجية'." },
-            { id: "217104919209", section: "origin", text: "في إحدى التجارب النفسية، تم توجيه مجموعة من المشاركين للاستجابة لمحفِّز سمعي محدَّد عن طريق الضغط على زر معين... توضح تلك التجربة أحد محاور فونت في المعمل، وهو:", options: ["أ) زمن الرجع", "ب) الطبيعة النفسية", "ج) الإدراك الحسي", "د) الإدراك العقلي"], correctOptionIndex: 0, topic: "فونت وزمن الرجع", knowledgeContext: "دراسات فونت حول زمن الرجع. راجع الشريحة 'المرحلة الفسيولوجية'." },
-            { id: "608198493013", section: "origin", text: "في عام ١٨٧٩، أنشأ هذا العالِم أول معمل لعلم النفس التجريبي في العالَم بجامعة ليبزج الألمانية. تُشير هذه العبارة إلى:", options: ["أ) ولهلم فونت", "ب) إميل دوركايم", "ج) هربرت سبنسر", "د) سيجموند فرويد"], correctOptionIndex: 0, topic: "فونت والمعمل التجريبي", knowledgeContext: "تأسيس فونت لأول معمل تجريبي. راجع الشريحة 'المرحلة الفسيولوجية'." },
-            { id: "206171819786", section: "origin", text: "بحث بافلوف في الوظائف العقلية وعلاقتها بالمحفزات البيئية، كالتفاعلات العضوية في الجسم وارتباطها بردود الفعل السلوكية للفرد. تعكس هذه الدراسة ظهور علم النفس في المرحلة:", options: ["أ) الفسيولوجية", "ب) الاستقلالية", "ج) الفلسفية", "د) التأملية"], correctOptionIndex: 0, topic: "المرحلة الفسيولوجية", knowledgeContext: "المرحلة الفسيولوجية وربط العمليات العقلية بالفسيولوجيا. راجع الشريحة 'المرحلة الفسيولوجية'." },
-            { id: "610141354724", section: "origin", text: "في هذه المرحلة من مراحل تطور علم النفس، عارض علماء النفس ارتباط علم النفس بعلم الفيسولوجي وعلم البيولوجي. ونظروا إليه باعتباره علمًا قائمًا بذاته. تشير العبارة السابقة إلى إحدى مراحل تطور علم النفس، وهي:", options: ["أ) المرحلة الاجتماعية", "ب) المرحلة الفلسفية", "ج) مرحلة الاستقلال", "د) المرحلة الفسيولوجية"], correctOptionIndex: 2, topic: "مرحلة الاستقلال", knowledgeContext: "مرحلة استقلال علم النفس كموضوع ومنهج. راجع الشريحة 'مرحلة الاستقلال'." },
-
-            // Section 2: أبرز مدارس واتجاهات علم النفس الحديث (10 أسئلة للاختبار المرحلي)
-            { id: "103134368671", section: "schools", text: "يقول أحد العلماء: «إذا أردت أن تعرف سبب العلة في مريض فيجب أن تُسلِّط الضوء على تاريخه؛ حتى تظهر الحقائق واضحةً تحت مجهر الماضي». نستخلص من القول السابق موضوع إحدى مدارس علم النفس الحديث، وهي:", options: ["أ) مدرسة التحليل النفسي", "ب) المدرسة البنائية", "ج) المدرسة المعرفية", "د) المدرسة السلوكية"], correctOptionIndex: 0, topic: "مدرسة التحليل النفسي", knowledgeContext: "أهمية الماضي والتاريخ الشخصي في مدرسة التحليل النفسي. راجع الشريحة 'مدرسة التحليل النفسي'." },
-            { id: "132197054904", section: "schools", text: "يقول جون واطسون: «يُصنَع الرجال لا يُولَدون … ». يعبِّر القول السابق عن إحدى مدارس علم النفس، وهي:", options: ["أ) مدرسة التحليل النفسي", "ب) المدرسة المعرفية", "ج) مدرسة الجشطلت", "د) المدرسة السلوكية"], correctOptionIndex: 3, topic: "المدرسة السلوكية", knowledgeContext: "جوهر المدرسة السلوكية ودور البيئة في تشكيل السلوك. راجع الشريحة 'المدرسة السلوكية'." },
-            { id: "236168251749", section: "schools", text: "إذا كان سلوك الأطفال جيدًا في حضور معلِّمهم، فإنهم يَعلَمون أنهم سيُكافَئون بالثناء عليهم. تُشير العبارة السابقة إلى إحدى مدارس علم النفس، وهي:", options: ["أ) المدرسة السلوكية", "ب) المدرسة الإنسانية", "ج) المدرسة البنائية", "د) مدرسة التحليل النفسي"], correctOptionIndex: 0, topic: "المدرسة السلوكية", knowledgeContext: "مبدأ التعلم بالتعزيز في المدرسة السلوكية. راجع الشريحة 'المدرسة السلوكية'." },
-            { id: "125103740275", section: "schools", text: "يجب أن يُحلِّل علماء النفس العمليات العقلية الواعية إلى عناصرها الأولية من إحساسات وإدراكات وصور ذهنية... تُمثِّل العبارة السابقة إحدى مدارس علم النفس، وهي:", options: ["أ) المدرسة السلوكية", "ب) مدرسة الجشطلت", "ج) المدرسة البنائية", "د) مدرسة التحليل النفسي"], correctOptionIndex: 2, topic: "المدرسة البنائية", knowledgeContext: "منهج تحليل الخبرة الشعورية في المدرسة البنائية. راجع الشريحة 'المدرسة البنائية'." },
-            { id: "214185785738", section: "schools", text: "كل لاعب في فريق كرة القدم قد يكون موهوبًا بشكل فردي... ولكن عندما يتعاون جميع اللاعبين معًا... يتحولون إلى فريق قوي ومنظم. يشير المثال السابق إلى فكر إحدى مدارس علم النفس، وهي:", options: ["أ) مدرسة التحليل النفسي", "ب) المدرسة السلوكية", "ج) مدرسة الجشطلت", "د) المدرسة البنائية"], correctOptionIndex: 2, topic: "مدرسة الجشطلت", knowledgeContext: "مبدأ 'الكل أكبر من مجموع أجزائه' في مدرسة الجشطلت. راجع الشريحة 'مدرسة الجشطلت'." },
-            { id: "329184021382", section: "schools", text: "تتأمَّل سيدة منظرًا ريفيًّا خلابًا، وأثناء تأمُّلها تركِّز على قلعة تاريخية جميلة... لأنها طالما حلمت بالعيش في قلعة مثلها عندما كانت طفلة. توضِّح العبارة السابقة بعض العمليات... المتضمَّنة في ردِّ فعل الإنسان تجاه المُثيرات.", options: ["أ) الجسمية", "ب) المعرفية", "ج) السلوكية", "د) التحليلية النفسية"], correctOptionIndex: 1, topic: "المدرسة المعرفية", knowledgeContext: "العمليات المعرفية مثل الانتباه والتفسير في المدرسة المعرفية. راجع الشريحة 'المدرسة المعرفية'." },
-            { id: "616163082028", section: "schools", text: "تُمثِّل الأحلام وسيلة للتعبير عن الرغبات المكبوتة والأفكار اللاواعية... تعكس العبارة السابقة رأي:", options: ["أ) نورمان", "ب) واطسون", "ج) فرتهيمر", "د) سيجموند فرويد"], correctOptionIndex: 3, topic: "مدرسة التحليل النفسي", knowledgeContext: "تفسير الأحلام ودور اللاوعي عند فرويد. راجع الشريحة 'مدرسة التحليل النفسي'." },
-            { id: "684191684786", section: "schools", text: "النشاط الإنساني كله... يمكن اختزاله في سلوك؛ ومن ثم يمكن ملاحظته وإخضاعه للقياس. تشير العبارة السابقة إلى مدرسة من مدارس علم النفس، من أبرز أعلامها:", options: ["أ) نورمان", "ب) فونت", "ج) كوفكا", "د) واطسون"], correctOptionIndex: 3, topic: "المدرسة السلوكية", knowledgeContext: "تركيز المدرسة السلوكية على السلوك القابل للملاحظة والقياس. راجع الشريحة 'المدرسة السلوكية'." },
-            { id: "746158291581", section: "schools", text: "عندما ننظر إلى مشهد طبيعي، نُدرِكه كُلًّا متكاملًا، ونُلاحِظ العناصر الرئيسية مثل السماء والأشجار والجبال، ثم نُركِّز لاحقًا على التفاصيل... تعكس العبارة السابقة فكر أحد روَّاد علم النفس، وهو:", options: ["أ) كوفكا", "ب) تتشينر", "ج) واطسون", "د) فروید"], correctOptionIndex: 0, topic: "مدرسة الجشطلت", knowledgeContext: "إدراك الكل قبل الأجزاء في مدرسة الجشطلت. راجع الشريحة 'مدرسة الجشطلت'." },
-            { id: "802152646837", section: "schools", text: "الفهم والإدراك عمليتان معقَّدتان تَحدُثان في مراحل متتالية. في البداية يركز الفرد انتباهه على المعلومات، ثم يحاول فهم معنى هذه المعلومات من خلال التفسير... هذه العبارة تكشف الجانب الذي تهتم به إحدى مدارس علم النفس، وهو:", options: ["أ) العمليات المعرفية", "ب) الدوافع اللاشعورية", "ج) السلوك وقياسه", "د) الإدراك الكلي"], correctOptionIndex: 0, topic: "المدرسة المعرفية", knowledgeContext: "العمليات المعرفية كالانتباه والتفسير في المدرسة المعرفية. راجع الشريحة 'المدرسة المعرفية'." },
-            
-            // Bank Questions - Additional samples (out of the remaining 100)
-            { id: "103171608702", section: "bank", text: "يقول أحد علماء النفس: «كل استجابة لها نوع ما من المُثيرات، وعلى ذلك فإن هناك حتمية بين المُثير والاستجابة». يُجسِّد هذا القول أفكار إحدى مدارس علم النفس؛ اكشف عنها مُطبِّقًا عليها بمثال من عندك.", options: ["أ) المدرسة السلوكية (مثال: رؤية الطعام تثير اللعاب)", "ب) مدرسة التحليل النفسي (مثال: الخوف من المرتفعات بسبب تجربة طفولة)", "ج) المدرسة المعرفية (مثال: التفكير في حل مشكلة قبل التصرف)", "د) مدرسة الجشطلت (مثال: إدراك لحن موسيقي ككل)"], correctOptionIndex: 0, topic: "المدرسة السلوكية", knowledgeContext: "مبدأ الحتمية بين المثير والاستجابة في المدرسة السلوكية. راجع الشريحة 'المدرسة السلوكية'." },
-            { id: "106128915703", section: "bank", text: "ساهم هذا العالم في مجال الطبيعة النفسية. الطبيعة النفسية هي أحد فروع علم النفس الذي يدرس العلاقة بين المثيرات الحسية والاستجابات أو ردود الأفعال الناتجة عنها. تناقش المقولة السابقة أحد أعمال:", options: ["أ) ويليام جيمس", "ب) إدوارد تيتشنر", "ج) جون واطسون", "د) فيلهلم فونت"], correctOptionIndex: 3, topic: "فونت والطبيعة النفسية", knowledgeContext: "إسهامات فونت في مجال الطبيعة النفسية. راجع الشريحة 'المرحلة الفسيولوجية'." },
-            { id: "132153628789", section: "bank", text: "غرسُ القيم والمبادئ في مرحلة الطفولة يُشكِّل الأساس الذي تقوم عليه شخصية الفرد طوال حياته. تشير العبارة السابقة إلى إحدى مدارس علم النفس، حدِّدها مع ذكر مثال من عندك.", options: ["أ) مدرسة التحليل النفسي (مثال: الطفل الذي يتعلم الصدق يصبح صادقًا في الكبر)", "ب) المدرسة السلوكية (مثال: مكافأة الطفل على السلوك الجيد)", "ج) المدرسة المعرفية (مثال: فهم الطفل لمعنى الأمانة)", "د) المدرسة البنائية (مثال: تحليل شعور الطفل تجاه قيمة معينة)"], correctOptionIndex: 0, topic: "مدرسة التحليل النفسي", knowledgeContext: "أهمية مرحلة الطفولة في تكوين الشخصية حسب مدرسة التحليل النفسي. راجع الشريحة 'مدرسة التحليل النفسي'." },
-            { id: "135131640307", section: "bank", text: "يعاني أدهم البالغ من العمر ٢٠ عامًا، من خوف غير منطقي من الفئران... وقد كشفت والدته أن أدهم قد عضَّه فأر عندما كان صغيرًا. يُعبِّر الموقف السابق عن:", options: ["أ) المدرسة المعرفية", "ب) المدرسة البنائية", "ج) المدرسة السلوكية (التعلم الشرطي الكلاسيكي)", "د) مدرسة التحليل النفسي (تأثير خبرات الطفولة)"], correctOptionIndex: 3, topic: "مدرسة التحليل النفسي", knowledgeContext: "تأثير خبرات الطفولة على السلوك في مدرسة التحليل النفسي. راجع الشريحة 'مدرسة التحليل النفسي'." },
-            { id: "137169707603", section: "bank", text: "انتقل علماء النفس إلى هذه المرحلة من مراحل التطوُّر؛ لأنهم أرادوا أن يستفيدوا من المنهجيات العلمية التي كانت مُستخدمة في العلوم التطبيقية. تُشير العبارة السابقة إلى إحدى مراحل تطوُّر علم النفس، وهي:", options: ["أ) المرحلة الفلسفية", "ب) المرحلة النفسية", "ج) المرحلة الفسيولوجية", "د) مرحلة الاستقلال"], correctOptionIndex: 2, topic: "المرحلة الفسيولوجية", knowledgeContext: "الانتقال للمرحلة الفسيولوجية للاستفادة من المنهجيات العلمية. راجع الشريحة 'المرحلة الفسيولوجية'."},
-             // ... (سيتم إضافة المزيد من الأسئلة هنا حتى 120 سؤالاً)
+            // --- مدارس علم النفس ---
+            { id: "qb_school_01", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "التحليل النفسي", text: "يقول أحد العلماء: «إذا أردت أن تعرف سبب العلة في مريض فيجب أن تُسلِّط الضوء على تاريخه؛ حتى تظهر الحقائق واضحةً تحت مجهر الماضي». نستخلص من القول السابق موضوع إحدى مدارس علم النفس الحديث، وهي...", options: [{text:"مدرسة التحليل النفسي", isCorrect:true}, {text:"المدرسة البنائية"}, {text:"المدرسة المعرفية"}, {text:"المدرسة السلوكية"}] },
+            { id: "qb_school_02", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "البنائية", text: "يجب أن يُحلِّل علماء النفس العمليات العقلية الواعية إلى عناصرها الأولية من إحساسات وإدراكات وصور ذهنية، واكتشاف الروابط بينها، كما يُحلِّل الكيميائي الماء إلى هيدروجين وأكسجين. تُمثِّل العبارة السابقة إحدى مدارس علم النفس، وهي...", options: [{text:"المدرسة السلوكية"}, {text:"مدرسة الجشطلت"}, {text:"المدرسة البنائية", isCorrect:true}, {text:"مدرسة التحليل النفسي"}] },
+            { id: "qb_school_03", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "السلوكية", text: "يقول جون واطسون: «يُصنَع الرجال لا يُولَدون … أعطِني الطفل، وسأجعله يتسلَّق... سأجعله سارقًا، أو قاتلًا...». يعبِّر القول السابق عن إحدى مدارس علم النفس، وهي...", options: [{text:"مدرسة التحليل النفسي"}, {text:"المدرسة المعرفية"}, {text:"مدرسة الجشطلت"}, {text:"المدرسة السلوكية", isCorrect:true}] },
+            { id: "qb_school_04", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "التحليل النفسي", text: "يعاني أدهم البالغ من العمر ٢٠ عامًا، من خوف غير منطقي من الفئران... كشفت والدته أن أدهم قد عضَّه فأر عندما كان صغيرًا. يُعبِّر الموقف السابق عن...", options: [{text:"المدرسة المعرفية"}, {text:"المدرسة البنائية"}, {text:"المدرسة السلوكية"}, {text:"مدرسة التحليل النفسي", isCorrect:true}] },
+            { id: "qb_school_05", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "البنائية", text: "«الخبرات والتجارب الحياتية تُشكِّل قيودًا نفسية لكل إنسان، وهو ما يجعل من الضروري أن يكون الفرد متيقظًا لذاته ومدركًا لها». تُجسِّد العبارة السابقة أفكار إحدى مدارس علم النفس، وهي المدرسة...", options: [{text:"البنائية", isCorrect:true}, {text:"الجشطلتية"}, {text:"المعرفية"}, {text:"السلوكية"}] },
+            { id: "qb_school_06", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "التحليل النفسي", text: "قد تجد أن الطريقة التي تتعامل بها مع الأحداث تكشف عن انطباعاتك الشعورية الخفية وتأثيرها في حياتك. تعكس العبارة السابقة أفكار إحدى مدارس علم النفس، وهي...", options: [{text:"المدرسة الجشطلتية"}, {text:"المدرسة المعرفية"}, {text:"المدرسة البنائية"}, {text:"مدرسة التحليل النفسي", isCorrect:true}] },
+            { id: "qb_school_07", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "التحليل النفسي", text: "عندما لا يستطيع أحد الأفراد إشباع رغباته العدوانية بشكل مباشر ضد رئيسه في العمل... فإن دوافعه اللاشعورية تدفعه نحو تفريغ غضبه بشكل غير واعٍ على أفراد عائلته... يعكس المثال السابق إحدى مدارس علم النفس، وهي...", options: [{text:"مدرسة التحليل النفسي", isCorrect:true}, {text:"المدرسة المعرفية"}, {text:"مدرسة الجشطلت"}, {text:"المدرسة السلوكية"}] },
+            { id: "qb_school_08", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "المعرفية", text: "عندما يتَّخذ الفرد سلوكًا مُعيَّنًا، فإن هذا السلوك لا يُعَدُّ انعكاسًا لعوامل خارجية وحسب، بل يُعَدُّ انعكاسًا لعوامل داخلية أيضًا. تُشِير العبارة السابقة إلى...؛ وهي إحدى مدارس علم النفس.", options: [{text:"مدرسة الجشطلت"}, {text:"المدرسة المعرفية", isCorrect:true}, {text:"المدرسة السلوكية"}, {text:"المدرسة البنائية"}] },
+            { id: "qb_school_09", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "الجشطلت", text: "تستند إحدى المدارس إلى فكرة أن العقل البشري يميل إلى تنظيم المعلومات الحِسِّية بشكل منظَّم ومتكامل... تُطبِّق العبارة فِكْر إحدى مدارس علم النفس، وهي...", options: [{text:"مدرسة الجشطلت", isCorrect:true}, {text:"المدرسة المعرفية"}, {text:"المدرسة السلوكية"}, {text:"المدرسة البنائية"}] },
+            { id: "qb_school_10", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "البنائية", text: "عرض معلِّمٌ على طلابه لوحة فنية، وبعد أن انتهوا من مشاهدتها طلب منهم اختيار عنوان يُعبِّر عن مشاعرهم تجاهها. يُجسِّد ما سبق أفكار إحدى مدارس علم النفس، وهي المدرسة...", options: [{text:"الجشطلتية"}, {text:"المعرفية"}, {text:"التحليلية"}, {text:"البنائية", isCorrect:true}] },
+            { id: "qb_school_11", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "التحليل النفسي", text: "يقرِّر عالِم نفسٍ أن شخصًا يخاف من القطط لأن قطة عضَّتْه عندما كان طفلًا. تُمثِّل العبارة السابقة إحدى مدارس علم النفس، هي...", options: [{text:"المدرسة المعرفية"}, {text:"مدرسة التحليل النفسي", isCorrect:true}, {text:"المدرسة الوظيفية"}, {text:"مدرسة الجشطلت"}] },
+            { id: "qb_school_12", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "الجشطلت", text: "كل لاعب في فريق كرة القدم قد يكون موهوبًا بشكل فردي... ولكن عندما يتعاون جميع اللاعبين معًا بوصفهم فريقًا واحدًا، يتحولون من مجموعة من اللاعبين إلى فريق قوي ومنظم. يشير المثال السابق إلى فكر إحدى مدارس علم النفس، وهي...", options: [{text:"مدرسة التحليل النفسي"}, {text:"المدرسة السلوكية"}, {text:"مدرسة الجشطلت", isCorrect:true}, {text:"المدرسة البنائية"}] },
+            { id: "qb_school_13", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "البنائية", text: "وجدت إحدى الدراسات أن تجاربنا السابقة تؤثر على حياتنا، لذلك من المهم أن نلاحظ أنفسنا لنفهم كيف تؤثر هذه التجارب علينا. تجسِّد العبارة السابقة أفكار إحدى مدارس علم النفس، وهي المدرسة...", options: [{text:"الجشطلتية"}, {text:"البنائية", isCorrect:true}, {text:"المعرفية"}, {text:"السلوكية"}] },
+            { id: "qb_school_14", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "السلوكية", text: "«بتنظيم الأنشطة التعليمية واستخدام أدوات تفاعلية في الفصل، يُمكِن للمعلم توفير بيئة تُشجِّع على المشاركة النشطة، وهو ما يُعزِّز من دقة تقييم استيعاب الطلاب». تشير العبارة السابقة إلى أفكار إحدى مدارس علم النفس، وهي...", options: [{text:"المدرسة البنائية"}, {text:"المدرسة السلوكية", isCorrect:true}, {text:"المدرسة الجشطلتية"}, {text:"مدرسة التحليل النفسي"}] },
+            { id: "qb_school_15", slideTitle: "سؤال", category: "مدارس علم النفس", topic: "السلوكية", text: "إذا كان سلوك الأطفال جيدًا في حضور معلِّمهم، فإنهم يَعلَمون أنهم سيُكافَئون بالثناء عليهم. تُشير العبارة السابقة إلى إحدى مدارس علم النفس، وهي...", options: [{text:"المدرسة السلوكية", isCorrect:true}, {text:"المدرسة الإنسانية"}, {text:"المدرسة البنائية"}, {text:"مدرسة التحليل النفسي"}] }
         ];
 
 
-        // --- Slide Navigation and Control ---
-        function showSlide(slideId) {
-            slides.forEach(s => s.classList.remove('active'));
-            const targetSlide = document.getElementById(slideId);
-            if (targetSlide) {
-                targetSlide.classList.add('active');
-                currentSlideIndex = Array.from(slides).indexOf(targetSlide);
-                updateProgressBar();
-                const textShape = targetSlide.querySelector('.text-shape');
-                if (textShape && !targetSlide.id.startsWith('slide0_')) { 
-                    textShape.style.animation = 'none';
-                    void textShape.offsetWidth; 
-                    textShape.style.animation = 'shapeEnter 0.7s ease-out forwards';
-                }
-            } else {
-                console.error("Slide not found: " + slideId);
-            }
-        }
+        const slidesContainer = document.getElementById('slides-container');
+        const navThumbnailsContainer = document.getElementById('nav-thumbnails');
+        const prevBtnTop = document.getElementById('prev-btn-top');
+        const nextBtnTop = document.getElementById('next-btn-top');
+        let slides = []; 
+        let navThumbnails = []; 
+        let currentSlide = 0;
+        let studentErrors = { "مراحل تاريخية": 0, "مدارس علم النفس": 0 };
+        let adaptiveTestTimerInterval;
+        const SWIPE_THRESHOLD = 50; // Min pixels for swipe
 
-        function updateProgressBar() {
-            const overallProgress = Array.from(slides).indexOf(slides[currentSlideIndex]);
-            const overallTotal = slides.length;
-            const progressPercentage = overallTotal > 0 ? ((overallProgress + 1) / overallTotal) * 100 : 0;
-            progressBar.style.width = Math.min(100, progressPercentage) + '%';
-        }
-
-
-        function nextLogicalSlide() {
-            if (currentLessonPart === 0) { 
-                currentLessonPart = 1; 
-                showSlide('slide1_content_origin_p1');
-            } else if (currentLessonPart === 1) { 
-                const originContentSlides = Array.from(slides).filter(s => s.id.startsWith('slide') && s.id.includes('_content_origin_'));
-                const currentIndexInOrigin = originContentSlides.indexOf(slides[currentSlideIndex]);
-                if (currentIndexInOrigin < originContentSlides.length - 1) {
-                    showSlide(originContentSlides[currentIndexInOrigin + 1].id);
-                } else { 
-                    currentLessonPart = 11; 
-                    startSectionQuiz(1);
-                }
-            } else if (currentLessonPart === 2) { 
-                const schoolsContentSlides = Array.from(slides).filter(s => s.id.startsWith('slide') && s.id.includes('_content_schools_'));
-                const currentIndexInSchools = schoolsContentSlides.indexOf(slides[currentSlideIndex]);
-                if (currentIndexInSchools < schoolsContentSlides.length - 1) {
-                    showSlide(schoolsContentSlides[currentIndexInSchools + 1].id);
-                } else { 
-                    currentLessonPart = 22; 
-                    startSectionQuiz(2);
-                }
-            }
-        }
-        
-        function prevLogicalSlide() {
-            const currentSlideId = slides[currentSlideIndex].id;
-
-            if (currentSlideId.includes('_content_schools_')) {
-                const schoolsContentSlides = Array.from(slides).filter(s => s.id.startsWith('slide') && s.id.includes('_content_schools_'));
-                const currentIndexInSchools = schoolsContentSlides.indexOf(slides[currentSlideIndex]);
-                if (currentIndexInSchools > 0) {
-                    showSlide(schoolsContentSlides[currentIndexInSchools - 1].id);
-                } else { 
-                    currentLessonPart = 11; 
-                    showSlide('slide_quiz_section1'); 
-                }
-            } else if (currentSlideId.includes('_content_origin_')) {
-                 const originContentSlides = Array.from(slides).filter(s => s.id.startsWith('slide') && s.id.includes('_content_origin_'));
-                const currentIndexInOrigin = originContentSlides.indexOf(slides[currentSlideIndex]);
-                if (currentIndexInOrigin > 0) {
-                    showSlide(originContentSlides[currentIndexInOrigin - 1].id);
-                } else {
-                    currentLessonPart = 0;
-                    showSlide('slide0_intro');
-                }
-            } else if (currentSlideId === 'slide_assessment_prompt') {
-                 currentLessonPart = 22; 
-                 showSlide('slide_quiz_section2');
-            } else if (currentSlideId === 'slide_performance_summary') {
-                 currentLessonPart = 3; 
-                 showSlide('slide_assessment_prompt');
-            }
-        }
-
-
-        // --- Quiz Logic ---
-        function startSectionQuiz(sectionNumber) {
-            currentQuiz = {
-                section: sectionNumber, 
-                questions: [],
-                currentIndex: 0,
-                score: 0,
-                mistakes: []
-            };
-
-            const quizQuestionPool = allQuestions.filter(q => q.section === (sectionNumber === 1 ? "origin" : "schools"));
-            currentQuiz.questions = shuffleArray(quizQuestionPool).slice(0, SECTION_QUIZ_QUESTION_COUNT);
-            
-            if (currentQuiz.questions.length < SECTION_QUIZ_QUESTION_COUNT) {
-                console.warn(`Warning: Not enough questions for section ${sectionNumber} quiz. Found ${currentQuiz.questions.length}, needed ${SECTION_QUIZ_QUESTION_COUNT}`);
-                 // If not enough, use what's available
-                 if (currentQuiz.questions.length === 0) {
-                     console.error("No questions available for section quiz " + sectionNumber);
-                     // Using a custom modal/message box instead of alert
-                     displayModal("خطأ: لا توجد أسئلة كافية لهذا الاختبار المرحلي.");
-                     if (sectionNumber === 1) { currentLessonPart = 2; showSlide('slide8_content_schools_p1');}
-                     else if (sectionNumber === 2) { currentLessonPart = 3; showSlide('slide_assessment_prompt');}
-                     return;
-                 }
-            }
-            
-            const quizSlideId = `slide_quiz_section${sectionNumber}`;
-            showSlide(quizSlideId);
-            loadQuizQuestion(sectionNumber);
-        }
-
-        function loadQuizQuestion(quizType) { 
-            if (!currentQuiz || currentQuiz.currentIndex >= currentQuiz.questions.length) {
-                handleQuizCompletion();
-                return;
-            }
-
-            const questionData = currentQuiz.questions[currentQuiz.currentIndex];
-            let promptEl, optionsEl, feedbackEl, nextBtnEl, counterEl;
-
-            if (quizType === 1) {
-                promptEl = document.getElementById('quiz_section1_prompt');
-                optionsEl = document.getElementById('quiz_section1_options');
-                feedbackEl = document.getElementById('quiz_section1_feedback');
-                nextBtnEl = document.getElementById('quiz_section1_next_q_btn');
-                counterEl = document.getElementById('quiz_section1_counter');
-            } else if (quizType === 2) {
-                promptEl = document.getElementById('quiz_section2_prompt');
-                optionsEl = document.getElementById('quiz_section2_options');
-                feedbackEl = document.getElementById('quiz_section2_feedback');
-                nextBtnEl = document.getElementById('quiz_section2_next_q_btn');
-                counterEl = document.getElementById('quiz_section2_counter');
-            } else if (quizType === "final") {
-                promptEl = document.getElementById('final_quiz_prompt');
-                optionsEl = document.getElementById('final_quiz_options');
-                feedbackEl = document.getElementById('final_quiz_feedback');
-                nextBtnEl = document.getElementById('final_quiz_next_q_btn');
-                counterEl = document.getElementById('final_quiz_counter');
-            }
-            
-            counterEl.innerHTML = `<span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">السؤال ${currentQuiz.currentIndex + 1}</span> من ${currentQuiz.questions.length}`;
-            promptEl.innerHTML = `<p>${questionData.text.replace(/\n/g, '<br>')}</p>`; 
-            optionsEl.innerHTML = ''; 
-            questionData.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.classList.add('quiz-option');
-                button.textContent = option;
-                button.addEventListener('click', () => handleQuizAnswer(button, index, questionData, optionsEl, feedbackEl, nextBtnEl));
-                optionsEl.appendChild(button);
-            });
-
-            feedbackEl.innerHTML = '';
-            feedbackEl.className = `feedback mt-4`;
-            feedbackEl.style.opacity = '0';
-            nextBtnEl.style.display = 'none';
-        }
-
-        async function handleQuizAnswer(button, selectedOptionIndex, questionData, optionsEl, feedbackEl, nextBtnEl) {
-            const optionButtons = optionsEl.querySelectorAll('.quiz-option');
-            optionButtons.forEach(btn => btn.disabled = true);
-            button.classList.add('selected');
-
-            feedbackEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تحليل إجابتك...';
-            feedbackEl.className = 'feedback mt-4 loading';
-            feedbackEl.style.opacity = '1';
-            applyFeedbackAnimation(feedbackEl);
-
-            const userAnswerText = button.textContent;
-            const aiExplanation = await getAIFeedback(questionData, userAnswerText, selectedOptionIndex);
-            
-            let feedbackContent = "";
-            if (selectedOptionIndex === questionData.correctOptionIndex) {
-                currentQuiz.score++;
-                feedbackContent = `<span class="star-icon"><i class="fas fa-star"></i></span> ${aiExplanation}`;
-            } else {
-                currentQuiz.mistakes.push({ questionId: questionData.id, topic: questionData.topic, questionText: questionData.text });
-                userMistakesLog.push({ questionId: questionData.id, topic: questionData.topic, questionText: questionData.text });
-                const correctButton = optionButtons[questionData.correctOptionIndex];
-                if (correctButton) {
-                    correctButton.classList.add('correct-answer-highlight');
-                }
-                feedbackContent = aiExplanation;
-            }
-            
-            feedbackEl.innerHTML = feedbackContent;
-            feedbackEl.className = 'feedback mt-4 ai-response';
-            applyFeedbackAnimation(feedbackEl);
-            nextBtnEl.style.display = 'block';
-        }
-        
-        function applyFeedbackAnimation(element) {
-            element.style.animation = 'none';
-            void element.offsetWidth;
-            element.style.animation = 'feedbackPopIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
-        }
-
-        function nextQuizQuestion() {
-            currentQuiz.currentIndex++;
-            loadQuizQuestion(currentQuiz.section === 3 ? "final" : currentQuiz.section); 
-        }
-
-        function handleQuizCompletion() {
-            const sectionNumber = currentQuiz.section; 
-            const scorePercentage = currentQuiz.questions.length > 0 ? (currentQuiz.score / currentQuiz.questions.length) : 0;
-            
-            let feedbackEl;
-            let nextButtonId;
-
-            if (sectionNumber === 1) { 
-                feedbackEl = document.getElementById('quiz_section1_feedback'); 
-                nextButtonId = 'quiz_section1_next_q_btn';
-            } else if (sectionNumber === 2) {
-                feedbackEl = document.getElementById('quiz_section2_feedback');
-                nextButtonId = 'quiz_section2_next_q_btn';
-            } else { // Final Assessment (section 3)
-                feedbackEl = document.getElementById('final_quiz_feedback');
-                nextButtonId = 'final_quiz_next_q_btn';
-                const finalScoreMessage = `<h3>التقويم النهائي مكتمل!</h3>
-                                        <p>نتيجتك: ${currentQuiz.score} من ${currentQuiz.questions.length} (${(scorePercentage * 100).toFixed(0)}%)</p>
-                                        <p>نأمل أن يكون هذا الدرس قد ساعدك على فهم المادة بشكل أفضل.</p>`;
-                feedbackEl.innerHTML = finalScoreMessage;
-                feedbackEl.className = 'feedback mt-4 ai-response text-center';
-                applyFeedbackAnimation(feedbackEl);
-                document.getElementById(nextButtonId).style.display = 'none';
-                
-                const thanksButton = document.createElement('button');
-                thanksButton.textContent = 'إنهاء الدرس';
-                thanksButton.classList.add('quiz-navigation-button', 'mt-4');
-                thanksButton.onclick = () => { currentLessonPart = 5; showSlide('slide_final_thanks'); };
-                feedbackEl.appendChild(thanksButton);
-                return;
-            }
-
-            document.getElementById(nextButtonId).style.display = 'none'; 
-
-            if (scorePercentage >= MASTERY_THRESHOLD) {
-                feedbackEl.innerHTML = `<p class="text-green-600 font-bold"><span class="star-icon">🎉</span> أحسنت! لقد اجتزت هذا الجزء بنجاح بنسبة (${(scorePercentage * 100).toFixed(0)}%).</p>`;
-                const proceedButton = document.createElement('button');
-                proceedButton.classList.add('quiz-navigation-button');
-                if (sectionNumber === 1) {
-                    proceedButton.textContent = 'الانتقال إلى الجزء التالي: أبرز مدارس علم النفس';
-                    proceedButton.onclick = () => { currentLessonPart = 2; showSlide('slide8_content_schools_p1'); };
-                } else if (sectionNumber === 2) {
-                    proceedButton.textContent = 'متابعة لعرض ملخص الأداء والتقويم النهائي'; 
-                     proceedButton.onclick = () => { currentLessonPart = 3; showSlide('slide_assessment_prompt'); };
-                }
-                feedbackEl.appendChild(proceedButton);
-            } else {
-                feedbackEl.innerHTML = `<p class="text-red-600 font-bold">لم تحقق نسبة النجاح المطلوبة (${(scorePercentage * 100).toFixed(0)}%). يرجى مراجعة المادة العلمية ثم إعادة الاختبار.</p>`;
-                const retryButton = document.createElement('button');
-                retryButton.textContent = 'إعادة الاختبار';
-                retryButton.classList.add('quiz-navigation-button');
-                retryButton.onclick = () => startSectionQuiz(sectionNumber);
-                feedbackEl.appendChild(retryButton);
-            }
-            applyFeedbackAnimation(feedbackEl);
-        }
-        
-        function showPerformanceSummary() {
-            currentLessonPart = 33; 
-            const strengthsList = document.getElementById('strengthsList');
-            const weaknessesList = document.getElementById('weaknessesList');
-            strengthsList.innerHTML = ''; 
-            weaknessesList.innerHTML = ''; 
-
-            const allCoveredTopics = [...new Set(allQuestions
-                .filter(q => q.section === "origin" || q.section === "schools") 
-                .map(q => q.topic))];
-            
-            const mistakeTopicsAndQuestions = userMistakesLog.map(m => ({ topic: m.topic, questionText: m.questionText }));
-
-            allCoveredTopics.forEach(topic => {
-                const li = document.createElement('li');
-                const mistakesInTopic = mistakeTopicsAndQuestions.filter(m => m.topic === topic);
-
-                if (mistakesInTopic.length === 0) {
-                    li.textContent = topic;
-                    strengthsList.appendChild(li);
-                } else {
-                    let topicHtml = `${topic}`; 
-                    li.innerHTML = topicHtml;
-                    weaknessesList.appendChild(li);
-                }
-            });
-
-            if (strengthsList.children.length === 0 && weaknessesList.children.length > 0) {
-                strengthsList.innerHTML = '<li>لا توجد مفاهيم تم إتقانها بالكامل في الاختبارات المرحلية.</li>';
-            } else if (strengthsList.children.length === 0 && weaknessesList.children.length === 0) {
-                 strengthsList.innerHTML = '<li>لم يتم إكمال اختبارات مرحلية بعد.</li>';
-            }
-
-            if (weaknessesList.children.length === 0) {
-                weaknessesList.innerHTML = '<li>أداء رائع! لا توجد أخطاء مسجلة في الاختبارات المرحلية أو جميع المفاهيم تم إتقانها.</li>';
-            }
-            showSlide('slide_performance_summary');
-        }
-
-
-        function startFinalAssessment() {
-            currentLessonPart = 4; 
-            currentQuiz = {
-                section: 3, 
-                questions: [],
-                currentIndex: 0,
-                score: 0,
-                mistakes: [] 
-            };
-            
-            const bankQuestions = allQuestions.filter(q => q.section === "bank" || q.section === "origin" || q.section === "schools"); 
-            let finalQuestionsPool = [];
-            
-            const mistakeTopics = [...new Set(userMistakesLog.map(m => m.topic))]; 
-            
-            mistakeTopics.forEach(topic => {
-                const relatedQuestions = bankQuestions.filter(q => q.topic === topic && !finalQuestionsPool.find(fq => fq.id === q.id));
-                finalQuestionsPool.push(...shuffleArray(relatedQuestions).slice(0, Math.ceil(FINAL_ASSESSMENT_QUESTION_COUNT / (mistakeTopics.length || 1) / 2))); 
-            });
-
-            const remainingNeeded = FINAL_ASSESSMENT_QUESTION_COUNT - finalQuestionsPool.length;
-            if (remainingNeeded > 0) {
-                const otherBankQuestions = bankQuestions.filter(q => !finalQuestionsPool.find(fq => fq.id === q.id));
-                finalQuestionsPool.push(...shuffleArray(otherBankQuestions).slice(0, remainingNeeded));
-            }
-            
-            currentQuiz.questions = shuffleArray(finalQuestionsPool).slice(0, FINAL_ASSESSMENT_QUESTION_COUNT); 
-
-            if (currentQuiz.questions.length === 0) {
-                 currentQuiz.questions = shuffleArray(bankQuestions).slice(0, Math.min(FINAL_ASSESSMENT_QUESTION_COUNT, bankQuestions.length));
-                 if(currentQuiz.questions.length === 0) {
-                     // Using a custom modal/message box instead of alert
-                     displayModal("لا توجد أسئلة كافية للتقويم النهائي.");
-                     showSlide('slide_final_thanks'); 
-                     return;
-                 }
-            }
-            
-            showSlide('slide_final_assessment_quiz');
-            loadQuizQuestion("final");
-        }
-
-        async function getAIFeedback(questionData, userAnswerText, selectedOptionIndex) {
-            // Destructure questionData, ensuring 'text' is used for the question itself.
-            const { text: questionText, options, correctOptionIndex, knowledgeContext, topic } = questionData;
-            const correctAnswerText = options[correctOptionIndex];
-            const isCorrect = selectedOptionIndex === correctOptionIndex;
-
-            let prompt;
-            if (isCorrect) {
-                prompt = `أنت معلم مساعد خبير في مادة علم النفس. الطالب أجاب على السؤال التالي بشكل صحيح:
-السؤال: "${questionText}"
-إجابة الطالب (الصحيحة): "${userAnswerText.substring(userAnswerText.indexOf(')') + 1).trim()}"
-الرجاء تقديم رد موجز ومشجع جداً باللغة العربية مثل "أحسنت!" أو "إجابة رائعة، ممتاز!" أو "صحيح! استمر في هذا التركيز!". لا تذكر معلومات عن الشريحة أو المنهج. اجعل الرد في جملة واحدة قصيرة ومبهجة.`;
-            } else {
-                prompt = `أنت معلم مساعد خبير في مادة علم النفس. الطالب أجاب على السؤال التالي بشكل خاطئ:
-السؤال: "${questionText}"
-إجابة الطالب (الخاطئة): "${userAnswerText.substring(userAnswerText.indexOf(')') + 1).trim()}"
-الإجابة الصحيحة هي: "${correctAnswerText.substring(correctAnswerText.indexOf(')') + 1).trim()}"
-المعلومات المتعلقة بهذا السؤال من المنهج الدراسي هي عن موضوع "${topic}" وتم شرحها في سياق "${knowledgeContext}"
-
-الرجاء تقديم شرح مفصل للطالب باللغة العربية، بالترتيب والتنسيق التاليين وفي فقرات موجزة ومنسقة (كل نقطة في فقرة جديدة):
-1.  أخبره أن إجابته خاطئة بأسلوب لطيف (مثال: "إجابتك ليست دقيقة هذه المرة.").
-2.  اذكر بوضوح ما هي الإجابة الصحيحة (مثال: "الإجابة الصحيحة هي: <strong>${correctAnswerText.substring(correctAnswerText.indexOf(')') + 1).trim()}</strong>.").
-3.  اشرح لماذا الإجابة الصحيحة هي الصحيحة، مع ربط الشرح بموضوع "${topic}". اجعل هذا الشرح موجزًا ومركزًا.
-4.  في فقرة منفصلة، اشرح لماذا الإجابة التي اختارها الطالب خاطئة، مع ربط الشرح بموضوع "${topic}". اجعل هذا الشرح موجزًا ومركزًا.
-5.  اذكر بوضوح أن عليه مراجعة موضوع "<span class="important-keyword">${topic}</span>" والذي تم شرحه ضمن "${knowledgeContext}" لفهم هذه النقطة بشكل أفضل.
-اجعل الشرح واضحًا، تعليميًا، ومشجعًا. تجنب استخدام أسلوب التوبيخ. لا تستخدم Markdown headings. استخدم <br> للفصل بين الفقرات إذا لزم الأمر.`;
-            }
-            
-            const apiKey = "AIzaSyChIOxuTAmBVpUddd3u77335X-GjnSn12Y"; // API Key inserted here
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    console.error("API Error Response:", errorBody);
-                    throw new Error(`API request failed with status ${response.status}`);
-                }
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    let formattedText = result.candidates[0].content.parts[0].text;
-                    formattedText = formattedText.replace(/\n\s*\n/g, '</p><p>'); 
-                    formattedText = formattedText.replace(/\n/g, '<br>'); 
-                    return `<p>${formattedText}</p>`; 
-                } else {
-                    console.error("Unexpected API response structure:", result);
-                    return "<p>لم نتمكن من الحصول على تقييم مفصل الآن. حاول مرة أخرى.</p>";
-                }
-            } catch (error) {
-                console.error('Error fetching AI feedback:', error);
-                return "<p>حدث خطأ أثناء محاولة الحصول على تقييم. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</p>";
-            }
-        }
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -1252,116 +671,509 @@
             return array;
         }
 
-        // --- Custom Modal for Alerts ---
-        function displayModal(message) {
-            // Check if a modal already exists
-            let modal = document.getElementById('customModal');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'customModal';
-                modal.style.position = 'fixed';
-                modal.style.left = '50%';
-                modal.style.top = '50%';
-                modal.style.transform = 'translate(-50%, -50%)';
-                modal.style.backgroundColor = 'white';
-                modal.style.padding = '25px'; // Increased padding
-                modal.style.border = '1px solid #ccc';
-                modal.style.borderRadius = '12px'; // More rounded corners
-                modal.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)'; // Softer shadow
-                modal.style.zIndex = '10000';
-                modal.style.textAlign = 'center'; // Center text
-                modal.style.fontFamily = "'Almarai', sans-serif"; // Match body font
-                modal.style.color = 'var(--text-dark)'; // Match text color
+        function createQuestionSlideHTML(questionData, globalSlideIndex) { // Pass globalSlideIndex for unique IDs if needed
+            const optionsHTML = shuffleArray([...questionData.options]).map(opt => 
+                `<button class="answer-btn bg-white border-2 border-gray-300 rounded-lg p-3 text-right transition duration-150 text-lg ${opt.isCorrect ? 'correct-answer' : ''}" data-answer-value="${opt.text}" data-answer-topic="${questionData.topic || ''}">${opt.text}</button>`
+            ).join('');
 
-                const messageP = document.createElement('p');
-                messageP.style.fontSize = '1.1rem'; // Slightly larger text
-                messageP.style.marginBottom = '20px'; // Space before button
-                modal.appendChild(messageP);
+            // Ensure slideTitle for questions from bank is just "سؤال"
+            const displaySlideTitle = "سؤال";
 
-                const closeButton = document.createElement('button');
-                closeButton.textContent = 'حسنًا';
-                closeButton.style.padding = '10px 20px';
-                closeButton.style.backgroundColor = 'var(--primary-color)';
-                closeButton.style.color = 'white';
-                closeButton.style.border = 'none';
-                closeButton.style.borderRadius = '8px';
-                closeButton.style.cursor = 'pointer';
-                closeButton.style.fontSize = '1rem';
-                closeButton.onclick = () => {
-                    modal.style.display = 'none';
-                };
-                modal.appendChild(closeButton);
-                document.body.appendChild(modal);
+            return `
+                <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" data-slide-title="${displaySlideTitle}" data-slide-category="${questionData.category}">
+                    <div class="slide-header bg-gradient-to-br from-teal-500 via-cyan-500 to-sky-600">
+                        <h1 class="text-3xl md:text-4xl font-bold">${displaySlideTitle}</h1>
+                        <p class="mt-2 opacity-90 text-lg">اختبر فهمك - ${questionData.category === "مراحل تاريخية" ? "المراحل التاريخية" : "مدارس علم النفس"}</p>
+                    </div>
+                    <div class="slide-content">
+                        <div class="question-box" data-question-id="${questionData.id}">
+                            <p class="text-gray-800 leading-relaxed mb-5 text-lg" id="question-text-${questionData.id}">${questionData.text}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${optionsHTML}
+                            </div>
+                            <div class="mt-4 hidden" id="feedback-correct-${questionData.id}"> <div class="bg-green-100 border-l-4 border-green-500 p-4 rounded"> <div class="flex"> <div class="flex-shrink-0"><i class="fas fa-check-circle text-green-600 text-xl"></i></div> <div class="mr-3"><p class="text-md text-green-700 font-medium">إجابة صحيحة!</p></div> </div> </div> </div>
+                            <div class="mt-4 hidden" id="feedback-incorrect-${questionData.id}"> <div class="bg-red-100 border-l-4 border-red-500 p-4 rounded"> <div class="flex"> <div class="flex-shrink-0"><i class="fas fa-times-circle text-red-600 text-xl"></i></div> <div class="mr-3"><p class="text-md text-red-700 font-medium">إجابة غير صحيحة. الإجابة الصحيحة هي: <span class="font-bold" id="correct-answer-text-${questionData.id}"></span></p></div> </div> </div> </div>
+                            <div id="ai-feedback-${questionData.id}" class="ai-feedback hidden"></div>
+                            <div id="loading-${questionData.id}" class="loading-spinner hidden"></div>
+                        </div>
+                        <div class="flex justify-center mt-6"> <button id="check-answer-${questionData.id}" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition duration-150 text-lg font-semibold flex items-center shadow-md active:scale-95"><i class="fas fa-question-circle ml-2"></i>التحقق من الإجابة</button> </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function insertSlidesAfterElement(newSlidesHTMLArray, targetElementId) {
+            const targetElement = document.getElementById(targetElementId);
+            if (targetElement) {
+                let currentElement = targetElement;
+                newSlidesHTMLArray.forEach(slideHTML => {
+                    currentElement.insertAdjacentHTML('afterend', slideHTML);
+                    currentElement = currentElement.nextElementSibling; // Move to the newly inserted slide
+                });
+            } else {
+                console.error("Target element for inserting slides not found:", targetElementId);
             }
-            
-            // Set message and display
-            modal.querySelector('p').textContent = message;
-            modal.style.display = 'block';
         }
 
 
-        startLessonBtn.addEventListener('click', () => {
-            currentLessonPart = 1; 
-            showSlide('slide1_content_origin_p1'); 
-        });
+        function initializeSlidesAndNavigation() {
+            slides = Array.from(document.querySelectorAll('#slides-container .slide')); 
+            navThumbnailsContainer.innerHTML = ''; 
+
+            slides.forEach((slide, index) => {
+                const thumbnail = document.createElement('button');
+                thumbnail.className = 'nav-thumbnail';
+                // Use the data-slide-title attribute for thumbnail text
+                const slideTitle = slide.dataset.slideTitle || `شريحة ${index + 1}`;
+                thumbnail.textContent = slideTitle;
+                thumbnail.dataset.slide = index;
+                
+                if(index === currentSlide) thumbnail.classList.add('active');
+                
+                thumbnail.addEventListener('click', () => {
+                    goToSlide(index);
+                });
+                navThumbnailsContainer.appendChild(thumbnail);
+            });
+            navThumbnails = Array.from(navThumbnailsContainer.querySelectorAll('.nav-thumbnail'));
+            updateNavButtons();
+            setupAllQuestionSlides(); 
+        }
+
+
+        function updateNavButtons() {
+            if (!prevBtnTop || !nextBtnTop || navThumbnails.length === 0) return;
+            prevBtnTop.disabled = currentSlide === 0;
+            nextBtnTop.disabled = currentSlide === slides.length - 1;
+            prevBtnTop.classList.toggle('opacity-50', currentSlide === 0);
+            prevBtnTop.classList.toggle('cursor-not-allowed', currentSlide === 0);
+            nextBtnTop.classList.toggle('opacity-50', currentSlide === slides.length - 1);
+            nextBtnTop.classList.toggle('cursor-not-allowed', currentSlide === slides.length - 1);
+
+            const activeThumbnail = navThumbnails[currentSlide];
+            if (activeThumbnail) {
+                activeThumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
         
-        showPerformanceSummaryBtn.addEventListener('click', showPerformanceSummary);
-        proceedToFinalAssessmentBtn.addEventListener('click', () => {
-            currentLessonPart = 3; 
-            showSlide('slide_assessment_prompt'); 
-        });
+        function goToSlide(slideIndex) {
+            if (slideIndex < 0 || slideIndex >= slides.length) return;
+
+            if (slides[currentSlide]) slides[currentSlide].classList.remove('active');
+            if (navThumbnails[currentSlide]) navThumbnails[currentSlide].classList.remove('active');
+            
+            currentSlide = slideIndex;
+            
+            if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+            if (navThumbnails[currentSlide]) navThumbnails[currentSlide].classList.add('active');
+            
+            updateNavButtons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        async function getAIFeedback(questionId, questionText, userAnswer, isCorrect, correctAnswerText) {
+            const feedbackDiv = document.getElementById(`ai-feedback-${questionId}`);
+            const loadingSpinner = document.getElementById(`loading-${questionId}`);
+            if (!feedbackDiv || !loadingSpinner) return;
+
+            loadingSpinner.classList.remove('hidden');
+            feedbackDiv.classList.add('hidden');
+            feedbackDiv.innerHTML = ''; 
+
+            let prompt;
+            if (isCorrect) {
+                prompt = `السؤال: "${questionText}"\nإجابة الطالب: "${userAnswer}" (صحيحة).\nقدم تغذية راجعة إيجابية وموجزة جداً (سطر واحد فقط لا يتجاوز 15 كلمة) للطالب تشجعه. اجعل الرد باللغة العربية الفصحى وبأسلوب تعليمي وودي.`;
+            } else {
+                prompt = `السؤال: "${questionText}"\nإجابة الطالب: "${userAnswer}" (خاطئة).\nالإجابة الصحيحة هي: "${correctAnswerText}".\nقدم تغذية راجعة بناءة وموجزة جداً (سطر واحد فقط لا يتجاوز 15 كلمة) للطالب تشرح لماذا إجابته خاطئة بشكل مختصر. اجعل الرد باللغة العربية الفصحى وبأسلوب تعليمي وودي.`;
+            }
+
+            try {
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('API Error Details:', errorData);
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    const aiText = result.candidates[0].content.parts[0].text;
+                    feedbackDiv.innerHTML = `<p><strong>تغذية راجعة إضافية:</strong></p><p>${aiText.replace(/\n/g, '<br>')}</p>`;
+                } else if (result.candidates && result.candidates[0]?.finishReason) {
+                     console.warn('AI Warning: Finish reason -', result.candidates[0].finishReason, result.candidates[0].safetyRatings);
+                     feedbackDiv.innerHTML = '<p>تم إنشاء جزء من التغذية الراجعة. قد يكون السبب يتعلق بسياسات المحتوى.</p>';
+                }
+                else {
+                    console.error('Unexpected API response structure:', result);
+                    feedbackDiv.innerHTML = '<p>عفواً، لم نتمكن من الحصول على تغذية راجعة إضافية حالياً.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching AI feedback:', error);
+                feedbackDiv.innerHTML = `<p>حدث خطأ أثناء محاولة الحصول على التغذية الراجعة الإضافية: ${error.message}</p>`;
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                feedbackDiv.classList.remove('hidden');
+            }
+        }
+
+        function setupAllQuestionSlides() {
+            document.querySelectorAll('.question-box').forEach(questionContainer => {
+                const questionId = questionContainer.dataset.questionId;
+                if (!questionId) return; // Skip if no question ID
+
+                const checkBtn = document.getElementById(`check-answer-${questionId}`);
+                const correctAnswerFeedbackDiv = document.getElementById(`feedback-correct-${questionId}`);
+                const incorrectAnswerFeedbackDiv = document.getElementById(`feedback-incorrect-${questionId}`);
+                const correctAnswerTextSpan = document.getElementById(`correct-answer-text-${questionId}`);
+                const answerButtons = questionContainer.querySelectorAll('.answer-btn');
+                const questionTextElement = document.getElementById(`question-text-${questionId}`);
+                let selectedButton = null;
+
+                answerButtons.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        answerButtons.forEach(b => b.classList.remove('selected-temp', 'correct', 'incorrect'));
+                        this.classList.add('selected-temp');
+                        selectedButton = this;
+                        
+                        if(correctAnswerFeedbackDiv) correctAnswerFeedbackDiv.classList.add('hidden');
+                        if(incorrectAnswerFeedbackDiv) incorrectAnswerFeedbackDiv.classList.add('hidden');
+                        const aiFeedbackDiv = document.getElementById(`ai-feedback-${questionId}`);
+                        if(aiFeedbackDiv) aiFeedbackDiv.classList.add('hidden');
+                        const loadingSpinner = document.getElementById(`loading-${questionId}`);
+                        if(loadingSpinner) loadingSpinner.classList.add('hidden');
+                    });
+                });
+
+                if (checkBtn) {
+                    // Remove previous event listener if any to avoid multiple bindings
+                    const newCheckBtn = checkBtn.cloneNode(true);
+                    checkBtn.parentNode.replaceChild(newCheckBtn, checkBtn);
+
+                    newCheckBtn.addEventListener('click', function() {
+                        if (!selectedButton) {
+                            const tempAlert = document.createElement('div');
+                            tempAlert.textContent = "الرجاء اختيار إجابة أولاً.";
+                            tempAlert.style.cssText = "position:fixed; top:80px; left:50%; transform:translateX(-50%); background-color: #f8d7da; color: #721c24; padding: 10px 20px; border-radius: 5px; z-index: 2000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);";
+                            document.body.appendChild(tempAlert);
+                            setTimeout(() => tempAlert.remove(), 3000);
+                            return;
+                        }
+                        
+                        answerButtons.forEach(b => b.classList.remove('selected-temp'));
+                        const isCorrect = selectedButton.classList.contains('correct-answer');
+                        const correctAnswerButton = questionContainer.querySelector('.answer-btn.correct-answer');
+                        const correctAnswerValue = correctAnswerButton ? correctAnswerButton.dataset.answerValue : "غير محدد";
+                        const questionText = questionTextElement ? questionTextElement.innerText.trim() : "نص السؤال غير موجود";
+                        const userAnswerValue = selectedButton.dataset.answerValue;
+                        
+                        const currentSlideElement = slides[currentSlide];
+                        const questionCategory = currentSlideElement ? currentSlideElement.dataset.slideCategory : null;
 
 
-        document.addEventListener('keydown', (event) => {
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || 
-                (currentQuiz && currentQuiz.questions.length > 0 && currentQuiz.currentIndex < currentQuiz.questions.length)) {
+                        if (isCorrect) {
+                            selectedButton.classList.add('correct');
+                            if(correctAnswerFeedbackDiv) correctAnswerFeedbackDiv.classList.remove('hidden');
+                            if(incorrectAnswerFeedbackDiv) incorrectAnswerFeedbackDiv.classList.add('hidden');
+                        } else {
+                            selectedButton.classList.add('incorrect');
+                            if (correctAnswerButton) correctAnswerButton.classList.add('correct');
+                            if(incorrectAnswerFeedbackDiv) {
+                                if(correctAnswerTextSpan) correctAnswerTextSpan.textContent = correctAnswerValue;
+                                incorrectAnswerFeedbackDiv.classList.remove('hidden');
+                            }
+                            if(correctAnswerFeedbackDiv) correctAnswerFeedbackDiv.classList.add('hidden');
+                            if (questionCategory && studentErrors.hasOwnProperty(questionCategory)) {
+                                studentErrors[questionCategory]++;
+                            }
+                        }
+                        getAIFeedback(questionId, questionText, userAnswerValue, isCorrect, correctAnswerValue);
+                        newCheckBtn.disabled = true; 
+                        newCheckBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    });
+                }
+            });
+        }
+
+        function createAdaptiveTestSlide(questions) {
+            const adaptiveQuestionsHTML = questions.map((q, i) => {
+                const optionsHTML = shuffleArray([...q.options]).map(opt => 
+                    `<button class="answer-btn bg-white border-2 border-gray-300 rounded-lg p-3 text-right transition duration-150 text-lg ${opt.isCorrect ? 'correct-answer' : ''}" data-answer-value="${opt.text}">${opt.text}</button>`
+                ).join('');
+                return `
+                    <div class="question-box mb-6" data-question-id="adapt_${q.id}">
+                        <p class="text-gray-800 leading-relaxed mb-3 text-lg">${i + 1}. ${q.text}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${optionsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="slide bg-white rounded-xl shadow-2xl overflow-hidden" id="adaptive-test-slide-content" data-slide-title="اختبار تكيفي" data-slide-category="اختبار">
+                    <div class="slide-header bg-gradient-to-br from-red-500 via-rose-600 to-pink-600">
+                        <h1 class="text-3xl md:text-4xl font-bold">الاختبار التكيفي</h1>
+                        <p class="mt-2 opacity-90 text-lg">ركز على هذه الأسئلة لتعزيز فهمك.</p>
+                    </div>
+                    <div class="slide-content">
+                        <div id="adaptive-test-timer" class="adaptive-test-timer">الوقت المتبقي: 20:00</div>
+                        <div id="adaptive-questions-container">
+                            ${adaptiveQuestionsHTML}
+                        </div>
+                        <div class="flex justify-center mt-6">
+                            <button id="submit-adaptive-test" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition duration-150 text-lg font-semibold flex items-center shadow-md active:scale-95">
+                                <i class="fas fa-check-double ml-2"></i>إنهاء الاختبار و عرض النتيجة
+                            </button>
+                        </div>
+                        <div id="adaptive-test-results-container" class="adaptive-test-results hidden"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function prepareAndShowAdaptiveTest() {
+            let weakestCategory = "مراحل تاريخية"; 
+            if (studentErrors["مدارس علم النفس"] > studentErrors["مراحل تاريخية"]) {
+                weakestCategory = "مدارس علم النفس";
+            } else if (studentErrors["مدارس علم النفس"] === 0 && studentErrors["مراحل تاريخية"] === 0) {
+                 // No errors, pick a mix or tell user they did well
+                 const resultsContainer = document.getElementById('adaptive-test-results-container'); // Need to create a placeholder for this
+                 if(resultsContainer) {
+                    resultsContainer.innerHTML = `<h3 class="text-2xl font-bold mb-3 text-green-600">تهانينا! لم يتم رصد أخطاء في الأقسام الرئيسية.</h3><p>يمكنك مراجعة الشرائح أو إعادة المحاولة.</p>`;
+                    resultsContainer.classList.remove('hidden');
+                    // Hide timer and submit button if no test is generated
+                    const timerEl = document.getElementById('adaptive-test-timer');
+                    const submitBtn = document.getElementById('submit-adaptive-test');
+                    if(timerEl) timerEl.classList.add('hidden');
+                    if(submitBtn) submitBtn.classList.add('hidden');
+                    return; // Skip test generation
+                 }
+            }
+
+
+            let adaptiveTestQuestionsPool = questionBank.filter(q => q.category === weakestCategory);
+            if (adaptiveTestQuestionsPool.length < 20) { 
+                const otherCategory = weakestCategory === "مراحل تاريخية" ? "مدارس علم النفس" : "مراحل تاريخية";
+                const additionalQuestions = questionBank.filter(q => q.category === otherCategory);
+                adaptiveTestQuestionsPool = adaptiveTestQuestionsPool.concat(shuffleArray(additionalQuestions));
+            }
+            const finalAdaptiveTestQuestions = shuffleArray(adaptiveTestQuestionsPool).slice(0, 20); 
+
+            if (finalAdaptiveTestQuestions.length === 0) {
+                 // Handle case where no questions could be selected (e.g., question bank issue)
+                 console.error("Could not generate adaptive test questions.");
+                 return;
+            }
+
+
+            const adaptiveTestSlideHTML = createAdaptiveTestSlide(finalAdaptiveTestQuestions);
+            const existingAdaptiveSlide = document.getElementById('adaptive-test-slide-content');
+            if (existingAdaptiveSlide) existingAdaptiveSlide.remove();
+            
+            slidesContainer.insertAdjacentHTML('beforeend', adaptiveTestSlideHTML);
+            initializeSlidesAndNavigation(); 
+
+            document.querySelectorAll('#adaptive-questions-container .answer-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parentQuestionBox = this.closest('.question-box');
+                    parentQuestionBox.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected-temp'));
+                    this.classList.add('selected-temp');
+                });
+            });
+            
+            const submitBtn = document.getElementById('submit-adaptive-test');
+            if(submitBtn) submitBtn.addEventListener('click', () => handleSubmitAdaptiveTest(false));
+            
+            startAdaptiveTestTimer(20 * 60); 
+        }
+        
+        function startAdaptiveTestTimer(durationInSeconds) {
+            const timerDisplay = document.getElementById('adaptive-test-timer');
+            if (!timerDisplay) return;
+            timerDisplay.classList.remove('hidden'); // Ensure timer is visible
+            clearInterval(adaptiveTestTimerInterval); 
+
+            let timer = durationInSeconds;
+            adaptiveTestTimerInterval = setInterval(() => {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerDisplay.textContent = `الوقت المتبقي: ${minutes}:${seconds}`;
+                
+                if (timer < 60 && !timerDisplay.classList.contains('low-time')) { 
+                    timerDisplay.classList.add('low-time'); // Removed 'text-red-600' to rely on .low-time class
+                }
+
+                if (--timer < 0) {
+                    clearInterval(adaptiveTestTimerInterval);
+                    timerDisplay.textContent = "الوقت انتهى!";
+                    handleSubmitAdaptiveTest(true); 
+                }
+            }, 1000);
+        }
+
+        function handleSubmitAdaptiveTest(timeUp = false) {
+            clearInterval(adaptiveTestTimerInterval);
+            const questionsContainer = document.getElementById('adaptive-questions-container');
+            const resultsContainer = document.getElementById('adaptive-test-results-container');
+            if (!questionsContainer || !resultsContainer) return;
+
+            let score = 0;
+            const adaptiveQuestionBoxes = questionsContainer.querySelectorAll('.question-box');
+            const totalQuestions = adaptiveQuestionBoxes.length;
+
+            adaptiveQuestionBoxes.forEach(qBox => {
+                const selectedBtn = qBox.querySelector('.answer-btn.selected-temp');
+                qBox.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true); 
+
+                if (selectedBtn) {
+                    selectedBtn.classList.remove('selected-temp');
+                    if (selectedBtn.classList.contains('correct-answer')) {
+                        score++;
+                        selectedBtn.classList.add('correct');
+                    } else {
+                        selectedBtn.classList.add('incorrect');
+                        const correctAnswerEl = qBox.querySelector('.answer-btn.correct-answer');
+                        if (correctAnswerEl) correctAnswerEl.classList.add('correct');
+                    }
+                } else { 
+                    const correctAnswerEl = qBox.querySelector('.answer-btn.correct-answer');
+                    if (correctAnswerEl) correctAnswerEl.classList.add('correct'); 
+                }
+            });
+            
+            const percentage = totalQuestions > 0 ? ((score / totalQuestions) * 100).toFixed(1) : 0;
+            resultsContainer.innerHTML = `
+                <h3 class="text-2xl font-bold mb-3 ${percentage >= 50 ? 'text-green-600' : 'text-red-600'}">
+                    ${timeUp ? 'انتهى الوقت! ' : ''}نتيجة الاختبار: ${score} من ${totalQuestions} (${percentage}%)
+                </h3>
+                <p class="text-lg">
+                    ${percentage >= 75 ? 'أداء رائع! استمر في المذاكرة.' : (percentage >= 50 ? 'جيد جداً! يمكنك مراجعة الأجزاء التي أخطأت فيها.' : 'تحتاج إلى المزيد من المراجعة. لا تيأس!')}
+                </p>
+            `;
+            resultsContainer.classList.remove('hidden');
+            const submitBtn = document.getElementById('submit-adaptive-test');
+            if(submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // --- Swipe Navigation ---
+        let xDown = null;
+        let yDown = null;
+        const swipeContainer = document.getElementById('slides-container');
+
+        swipeContainer.addEventListener('touchstart', handleTouchStart, { passive: true }); // Make passive true if not calling preventDefault in start
+        swipeContainer.addEventListener('touchmove', handleTouchMove, { passive: false }); // Must be false to allow preventDefault
+        swipeContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        function handleTouchStart(evt) {
+            const firstTouch = evt.touches[0];
+            xDown = firstTouch.clientX;
+            yDown = firstTouch.clientY;
+        }
+
+        function handleTouchMove(evt) {
+            if (!xDown || !yDown) {
                 return;
             }
-            if (currentLessonPart === 0 || currentLessonPart === 5 || currentLessonPart === 33) return; 
+            let xUp = evt.touches[0].clientX;
+            let yUp = evt.touches[0].clientY;
+            let xDiff = xDown - xUp;
+            let yDiff = yDown - yUp;
 
-            if (event.key === 'ArrowRight' || event.key === 'PageDown') { 
-                prevLogicalSlide(); 
-            } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') { 
-                nextLogicalSlide(); 
+            // If horizontal movement is more significant than vertical, prevent default page scroll.
+            if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                evt.preventDefault();
             }
-        });
-        
-        presentationContainer.addEventListener('touchstart', (event) => {
-            if (event.target.closest('.quiz-option') || 
-                (currentQuiz && currentQuiz.questions.length > 0 && currentQuiz.currentIndex < currentQuiz.questions.length) ||
-                currentLessonPart === 0 || currentLessonPart === 5 || currentLessonPart === 33 ) return;
-            touchStartX = event.changedTouches[0].screenX;
-        }, { passive: false }); 
+        }
 
-        presentationContainer.addEventListener('touchmove', (event) => { /* event.preventDefault(); */ }, { passive: false });
+        function handleTouchEnd(evt) {
+            if (!xDown || !yDown) {
+                return;
+            }
+            let xUp = evt.changedTouches[0].clientX;
+            let yUp = evt.changedTouches[0].clientY;
+            let xDiff = xDown - xUp; // Positive for left swipe (next in LTR, also next in RTL visual flow)
+            let yDiff = yDown - yUp;
 
-        presentationContainer.addEventListener('touchend', (event) => {
-             if (event.target.closest('.quiz-option') || 
-                (currentQuiz && currentQuiz.questions.length > 0 && currentQuiz.currentIndex < currentQuiz.questions.length) ||
-                currentLessonPart === 0 || currentLessonPart === 5 || currentLessonPart === 33) return;
-            touchEndX = event.changedTouches[0].screenX;
-            handleSwipeGesture();
-        });
-
-        function handleSwipeGesture() {
-            if (touchStartX === 0 || touchEndX === 0) return; 
-            const deltaX = touchEndX - touchStartX;
-            if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX < 0) { 
-                    nextLogicalSlide();
-                } else { 
-                    prevLogicalSlide();
+            if (Math.abs(xDiff) > Math.abs(yDiff)) { // Horizontal swipe
+                if (Math.abs(xDiff) > SWIPE_THRESHOLD) {
+                    if (xDiff > 0) { // Swiped left (finger moved from right to left)
+                        if (currentSlide < slides.length - 1) nextBtnTop.click();
+                    } else { // Swiped right (finger moved from left to right)
+                        if (currentSlide > 0) prevBtnTop.click();
+                    }
                 }
             }
-            touchStartX = 0; touchEndX = 0;
+            xDown = null;
+            yDown = null;
         }
-        
-        document.getElementById('quiz_section1_next_q_btn').addEventListener('click', nextQuizQuestion);
-        document.getElementById('quiz_section2_next_q_btn').addEventListener('click', nextQuizQuestion);
-        document.getElementById('final_quiz_next_q_btn').addEventListener('click', nextQuizQuestion);
-        document.getElementById('startFinalAssessmentBtn').addEventListener('click', startFinalAssessment);
 
-        showSlide('slide0_intro'); 
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const historicalQuestions = shuffleArray(questionBank.filter(q => q.category === "مراحل تاريخية")).slice(0, 10);
+            const historicalQuestionsHTML = historicalQuestions.map((q, i) => createQuestionSlideHTML(q, slidesContainer.children.length + i));
+            insertSlidesAfterElement(historicalQuestionsHTML, 'historical-stages-end');
+
+            const schoolQuestions = shuffleArray(questionBank.filter(q => q.category === "مدارس علم النفس")).slice(0, 10);
+            const schoolQuestionsHTML = schoolQuestions.map((q, i) => createQuestionSlideHTML(q, slidesContainer.children.length + i));
+            insertSlidesAfterElement(schoolQuestionsHTML, 'schools-of-psychology-end');
+            
+            const lastSchoolQuestionSlide = slidesContainer.querySelector('[data-slide-category="مدارس علم النفس"]:last-of-type') || document.getElementById('schools-of-psychology-end');
+            
+            if (lastSchoolQuestionSlide) {
+                const adaptiveTestTriggerButtonHTML = `
+                    <div class="mt-10 flex justify-center">
+                        <button id="trigger-adaptive-test-btn" class="bg-purple-600 text-white px-8 py-4 rounded-lg hover:bg-purple-700 transition duration-150 text-xl font-semibold flex items-center shadow-lg active:scale-95">
+                            <i class="fas fa-graduation-cap ml-3"></i>بدء الاختبار التكيفي
+                        </button>
+                    </div>
+                `;
+                const slideContent = lastSchoolQuestionSlide.querySelector('.slide-content');
+                if (slideContent) { 
+                    const existingCheckButtonContainer = slideContent.querySelector('.flex.justify-center.mt-6');
+                    if (existingCheckButtonContainer) existingCheckButtonContainer.remove();
+                    slideContent.insertAdjacentHTML('beforeend', adaptiveTestTriggerButtonHTML);
+                }
+
+                const triggerBtn = document.getElementById('trigger-adaptive-test-btn');
+                if (triggerBtn) {
+                    triggerBtn.addEventListener('click', () => {
+                        prepareAndShowAdaptiveTest();
+                        const adaptiveSlide = document.getElementById('adaptive-test-slide-content');
+                        if (adaptiveSlide) {
+                            const allSlidesArray = Array.from(slidesContainer.querySelectorAll('.slide'));
+                            const adaptiveSlideIndex = allSlidesArray.indexOf(adaptiveSlide);
+                            if (adaptiveSlideIndex !== -1) {
+                                goToSlide(adaptiveSlideIndex);
+                            }
+                        }
+                    });
+                }
+            }
+
+            initializeSlidesAndNavigation(); 
+            
+            prevBtnTop.addEventListener('click', () => goToSlide(currentSlide - 1));
+            nextBtnTop.addEventListener('click', () => goToSlide(currentSlide + 1));
+            document.addEventListener('keydown', (e) => {
+                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') e.preventDefault();
+                if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) nextBtnTop.click();
+                else if (e.key === 'ArrowLeft' && currentSlide > 0) prevBtnTop.click();
+            });
+        });
+
     </script>
 </body>
 </html>
