@@ -664,51 +664,54 @@
             }
         },
 
-        security: {
-            SALT: "a-secure-static-salt-for-obfuscation",
-            encrypt(key) { try { return btoa(key + this.SALT); } catch { return ''; } },
-            decrypt(encryptedKey) { try { const decoded = atob(encryptedKey); return decoded.endsWith(this.SALT) ? decoded.slice(0, -this.SALT.length) : ''; } catch { return ''; } },
-            sanitize(html) {
-                if (typeof html !== 'string') return html;
-                if (window.DOMPurify) {
-                    return DOMPurify.sanitize(html, {
-                        ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field', 'audio'],
-                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'data-blank', 'read-only', 'controls', 'virtual-keyboard-mode', 'use-shared-virtual-keyboard']
-                    });
+                    security: {
+                SALT: "a-secure-static-salt-for-obfuscation",
+                encrypt(key) { try { return btoa(key + this.SALT); } catch { return ''; } },
+                decrypt(encryptedKey) { try { const decoded = atob(encryptedKey); return decoded.endsWith(this.SALT) ? decoded.slice(0, -this.SALT.length) : ''; } catch { return ''; } },
+                sanitize(html) {
+                    if (typeof html !== 'string') return html;
+                    if (window.DOMPurify) {
+                        return DOMPurify.sanitize(html, {
+                            ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field', 'audio'],
+                            ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'data-blank', 'read-only', 'controls', 'virtual-keyboard-mode', 'use-shared-virtual-keyboard', 'data-node-type', 'data-node-variation']
+                        });
+                    }
+                    return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
                 }
-                return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-            }
-        },
+            },
 
-        quality: {
-            wantsArabicIndicDigits(subject, grade) {
-                if (subject === 'Mathematics' && ['Grades 1–3','Grades 8–12'].includes(grade)) return true;
-                if (subject === 'Science' && grade === 'Grade 9') return true;
-                return false;
-            },
-            protectSegments(text) {
-                const placeholders = {};
-                let idx = 0;
-                const patterns = [
-                    /<math-field[\s\S]*?<\/math-field>/g,
-                    /<audio[\s\S]*?<\/audio>/g,
-                    /<img[^>]*>/g,
-                    /<table[\s\S]*?<\/table>/g,
-                    /_{3,}/g,
-                    /```[\s\S]*?```/g,
-                    /`[^`]*`/g,
-                    /\$\$[\s\S]*?\$\$/g,
-                    /\$[^$]*\$/g,
-                    /\\\[[\s\S]*?\\]/g,
-                    /\\\([\s\S]*?\\\)/g,
-                    /https?:\/\/\S+/g
-                ];
-                let protectedText = String(text || '');
-                for (const re of patterns) {
-                    protectedText = protectedText.replace(re, (m) => { const ph = `__LOCK_${idx++}__`; placeholders[ph] = m; return ph; });
-                }
-                return { protectedText, placeholders };
-            },
+                    quality: {
+                wantsArabicIndicDigits(subject, grade) {
+                    if (subject === 'Mathematics' && ['Grades 1–3','Grades 8–12'].includes(grade)) return true;
+                    if (subject === 'Science' && grade === 'Grade 9') return true;
+                    return false;
+                },
+                protectSegments(text) {
+                    const placeholders = {};
+                    let idx = 0;
+                    const patterns = [
+                        /<math-field[\s\S]*?<\/math-field>/g,
+                        /<audio[\s\S]*?<\/audio>/g,
+                        /<img[^>]*>/g,
+                        /<table[\s\S]*?<\/table>/g,
+                        /_{3,}/g,
+                        /```[\s\S]*?```/g,
+                        /`[^`]*`/g,
+                        /\$\$[\s\S]*?\$\$/g,
+                        /\$[^$]*\$/g,
+                        /\\\[[\s\S]*?\\]/g,
+                        /\\\([\s\S]*?\\\)/g,
+                        /https?:\/\/\S+/g,
+                        // Protect Lexical theme elements that might interfere with translation
+                        /<span[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/span>/g,
+                        /<p[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/p>/g
+                    ];
+                    let protectedText = String(text || '');
+                    for (const re of patterns) {
+                        protectedText = protectedText.replace(re, (m) => { const ph = `__LOCK_${idx++}__`; placeholders[ph] = m; return ph; });
+                    }
+                    return { protectedText, placeholders };
+                },
             restoreSegments(text, placeholders) {
                 if (!placeholders) return text;
                 let out = text || '';
@@ -820,6 +823,14 @@
                     useProofread: TranslatorApp.dom.useProofreadCheckbox.checked
                 };
                 localStorage.setItem('translatorSession', JSON.stringify(sessionData));
+                // Always save API keys to sessionStorage for persistence across browser sessions
+                if (TranslatorApp.dom.geminiKeyInput.value || TranslatorApp.dom.chatgptKeyInput.value) {
+                    sessionStorage.setItem('translatorPersistentKeys', JSON.stringify({
+                        gemini: TranslatorApp.security.encrypt(TranslatorApp.dom.geminiKeyInput.value),
+                        chatgpt: TranslatorApp.security.encrypt(TranslatorApp.dom.chatgptKeyInput.value),
+                        provider: document.querySelector('input[name="apiProvider"]:checked').value
+                    }));
+                }
                 if (ephemeral) {
                     sessionStorage.setItem('translatorEphemeralKeys', JSON.stringify({
                         gemini: TranslatorApp.security.encrypt(TranslatorApp.dom.geminiKeyInput.value),
@@ -836,14 +847,33 @@
                 try {
                     const s = JSON.parse(saved);
                     TranslatorApp.dom.ephemeralKeysCheckbox.checked = !!s.ephemeralKeys;
+                    
+                    // Load API keys with fallback to persistent storage
+                    let keysLoaded = false;
                     if (s.apiKeys && !s.ephemeralKeys) {
                         TranslatorApp.dom.geminiKeyInput.value = TranslatorApp.security.decrypt(s.apiKeys?.gemini || '');
                         TranslatorApp.dom.chatgptKeyInput.value = TranslatorApp.security.decrypt(s.apiKeys?.chatgpt || '');
+                        keysLoaded = true;
                     } else if (s.ephemeralKeys) {
                         const sk = JSON.parse(sessionStorage.getItem('translatorEphemeralKeys') || '{}');
                         TranslatorApp.dom.geminiKeyInput.value = TranslatorApp.security.decrypt(sk?.gemini || '');
                         TranslatorApp.dom.chatgptKeyInput.value = TranslatorApp.security.decrypt(sk?.chatgpt || '');
+                        keysLoaded = true;
                     }
+                    
+                    // Fallback to persistent keys if no keys loaded from session
+                    if (!keysLoaded) {
+                        const persistentKeys = JSON.parse(sessionStorage.getItem('translatorPersistentKeys') || '{}');
+                        if (persistentKeys.gemini || persistentKeys.chatgpt) {
+                            TranslatorApp.dom.geminiKeyInput.value = TranslatorApp.security.decrypt(persistentKeys.gemini || '');
+                            TranslatorApp.dom.chatgptKeyInput.value = TranslatorApp.security.decrypt(persistentKeys.chatgpt || '');
+                            if (persistentKeys.provider) {
+                                const radio = document.querySelector(`input[name="apiProvider"][value="${persistentKeys.provider}"]`);
+                                if (radio) { radio.checked = true; TranslatorApp.events.onApiProviderChange({ target: { value: persistentKeys.provider } }); }
+                            }
+                        }
+                    }
+                    
                     TranslatorApp.dom.localModelUrl.value = s.localModelUrl || 'http://localhost:11434/api/generate';
                     TranslatorApp.dom.localModelName.value = s.localModelName || 'gemma:7b';
                     TranslatorApp.state.selectedFilesInfo = s.selectedFilesInfo || [];
@@ -858,7 +888,7 @@
                     TranslatorApp.dom.useTmCheckbox.checked = s.useTM ?? true;
                     TranslatorApp.dom.useProofreadCheckbox.checked = s.useProofread ?? false;
 
-                    if (s.selectedProvider) {
+                    if (s.selectedProvider && !keysLoaded) {
                         const radio = document.querySelector(`input[name="apiProvider"][value="${s.selectedProvider}"]`);
                         if (radio) { radio.checked = true; TranslatorApp.events.onApiProviderChange({ target: { value: s.selectedProvider } }); }
                     }
@@ -885,6 +915,8 @@
                 if (btn.dataset.confirm === 'true') {
                     localStorage.removeItem('translatorSession');
                     sessionStorage.removeItem('translatorEphemeralKeys');
+                    // Keep persistent API keys unless user explicitly wants to clear everything
+                    // sessionStorage.removeItem('translatorPersistentKeys');
                     location.reload();
                 } else {
                     btn.dataset.confirm = 'true';
@@ -1751,6 +1783,10 @@
             renderContentWithMath(htmlString) {
                 if (typeof htmlString !== 'string' || !htmlString) {
                     return '<div class="content-root" dir="rtl">&nbsp;</div>';
+                }
+                // Debug: log problematic content
+                if (htmlString.includes('__LOCK') || htmlString.includes('LexicalTheme')) {
+                    console.log('Problematic content detected:', htmlString.substring(0, 200));
                 }
                 // 1) Keep any pre-existing <math-field> as-is to avoid double-wrapping
                 htmlString = htmlString.replace(/<math-field[\s\S]*?<\/math-field>/gi, (m) => `__MATHFIELD__${btoa(unescape(encodeURIComponent(m)))}__`);
