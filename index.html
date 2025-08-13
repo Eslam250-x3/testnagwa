@@ -381,7 +381,7 @@
         },
         
         bindEvents() {
-            this.dom.newSessionBtn.addEventListener('click', this.session.clear.bind(this));
+            this.dom.newSessionBtn.addEventListener('click', this.session.clear.bind(this.session));
             this.dom.apiProviderRadios.forEach(radio => radio.addEventListener('change', this.events.onApiProviderChange.bind(this)));
             this.dom.fileUpload.addEventListener('click', () => this.dom.fileInput.click());
             this.dom.fileUpload.addEventListener('dragover', this.events.onDragOver);
@@ -395,7 +395,7 @@
             this.dom.chatgptKeyInput.addEventListener('input', () => this.state.hasUnsavedChanges = true);
             this.dom.localModelUrl.addEventListener('input', () => this.state.hasUnsavedChanges = true);
             this.dom.localModelName.addEventListener('input', () => this.state.hasUnsavedChanges = true);
-            this.dom.themeToggle.addEventListener('click', this.theme.toggle.bind(this));
+            this.dom.themeToggle.addEventListener('click', this.theme.toggle.bind(this.theme));
             this.dom.mappedIdsInput.addEventListener('input', () => this.state.hasUnsavedChanges = true);
             this.dom.useMappedIdsCheckbox.addEventListener('change', () => this.state.hasUnsavedChanges = true);
             this.dom.ephemeralKeysCheckbox.addEventListener('change', () => this.state.hasUnsavedChanges = true);
@@ -489,18 +489,46 @@
 
         utils: {
             collectAllTextsFromFiles(filesArr) {
-                const bag = [];
+                const bag = new Set();
+                const toPlain = (html) => { 
+                    if (typeof html !== 'string') return '';
+                    const div = document.createElement('div'); 
+                    div.innerHTML = html; 
+                    return (div.textContent || div.innerText || '').trim(); 
+                };
+
+                const traverse = (obj) => {
+                    if (!obj) return;
+                    if (Array.isArray(obj)) {
+                        obj.forEach(item => traverse(item));
+                    } else if (typeof obj === 'object') {
+                        Object.keys(obj).forEach(key => {
+                            const value = obj[key];
+                            // **IMPROVEMENT**: More specific keys to check for translatable content
+                            const translatableKeys = ['stem', 'html_content', 'answer', 'statement'];
+                            if (translatableKeys.includes(key) && typeof value === 'string') {
+                                const plain = toPlain(value);
+                                if (plain) bag.add(plain);
+                            } else if (key === 'gap_text_keys' && Array.isArray(value)) {
+                                value.forEach(item => {
+                                    if(item && typeof item.value === 'string') {
+                                        const plain = toPlain(item.value);
+                                        if (plain) bag.add(plain);
+                                    }
+                                });
+                            }
+                            else {
+                                traverse(value);
+                            }
+                        });
+                    }
+                };
+
                 filesArr.forEach(f => {
-                    const d = f.data || {};
-                    if (d.statement) bag.push(d.statement);
-                    (d.parts || []).forEach(p => {
-                        if (p.stem) bag.push(p.stem);
-                        if (p.answer) bag.push(p.answer);
-                        (p.choices || []).forEach(c => c?.html_content && bag.push(c.html_content));
-                    });
+                    if (f.data) traverse(f.data);
                 });
-                const toPlain = (html) => { const div = document.createElement('div'); div.innerHTML = html; return (div.textContent || div.innerText || '').trim(); };
-                return Array.from(new Set(bag.map(toPlain).filter(Boolean)));
+                
+                return Array.from(bag);
             },
             escapeRegex(str) { return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
         },
@@ -580,10 +608,9 @@
             sanitize(html) {
                 if (typeof html !== 'string') return html;
                 if (window.DOMPurify) {
-                    // Allow math-field and its attributes for MathLive
                     return DOMPurify.sanitize(html, {
-                        ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field'],
-                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'read-only']
+                        ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field', 'audio'],
+                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'read-only', 'controls']
                     });
                 }
                 return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
@@ -600,10 +627,11 @@
                 const placeholders = {};
                 let idx = 0;
                 const patterns = [
-                    /<math-field[\s\S]*?<\/math-field>/g, // Protect MathLive tags
-                    /<img[^>]*>/g, // Protect image tags
-                    /<table[\s\S]*?<\/table>/g, // Protect table tags
-                    /_{3,}/g, // Blanks (e.g., ___)
+                    /<math-field[\s\S]*?<\/math-field>/g,
+                    /<audio[\s\S]*?<\/audio>/g,
+                    /<img[^>]*>/g,
+                    /<table[\s\S]*?<\/table>/g,
+                    /_{3,}/g,
                     /```[\s\S]*?```/g,
                     /`[^`]*`/g,
                     /\$\$[\s\S]*?\$\$/g,
@@ -790,10 +818,22 @@
                 }
             },
             clear() {
-                if (confirm('هل أنت متأكد أنك تريد بدء جلسة جديدة؟ سيتم حذف جميع البيانات الحالية.')) {
+                const btn = TranslatorApp.dom.newSessionBtn;
+                if (btn.dataset.confirm === 'true') {
                     localStorage.removeItem('translatorSession');
                     sessionStorage.removeItem('translatorEphemeralKeys');
                     location.reload();
+                } else {
+                    btn.dataset.confirm = 'true';
+                    btn.textContent = 'هل أنت متأكد؟ انقر مجدداً';
+                    btn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                    btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    setTimeout(() => {
+                        btn.dataset.confirm = 'false';
+                        btn.textContent = 'بدء جلسة جديدة';
+                        btn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                        btn.classList.add('bg-red-500', 'hover:bg-red-600');
+                    }, 3000);
                 }
             }
         },
@@ -812,9 +852,9 @@
 
         validation: {
             validateJsonStructure(data, fileName) {
-                const requiredFields = ['statement', 'parts'];
-                const hasAllFields = requiredFields.every(field => data.hasOwnProperty(field));
-                if (!hasAllFields) throw new Error(`ملف ${fileName} يفتقد للحقول المطلوبة (statement, parts).`);
+                if (typeof data !== 'object' || !data.hasOwnProperty('parts')) {
+                     throw new Error(`ملف ${fileName} يفتقد للحقل المطلوب (parts).`);
+                }
                 return true;
             },
             validateApiKey(key, provider) {
@@ -1292,6 +1332,25 @@
                         });
                     }
                     file.data.parts?.forEach((part, partIndex) => {
+                        // **IMPROVEMENT**: Handle gapText questions by translating the 'value' in 'gap_text_keys'
+                        if (part.type === 'gapText' && Array.isArray(part.gap_text_keys)) {
+                            part.gap_text_keys.forEach((keyItem, keyIndex) => {
+                                if (keyItem && typeof keyItem.value === 'string') {
+                                    const src = keyItem.value;
+                                    const prot = this.quality.protectSegments(src);
+                                    const gl = applyGlossary(prot.protectedText);
+                                    translationJobs.push({
+                                        type: 'single',
+                                        originalText: gl.modifiedText,
+                                        placeholders: { locks: prot.placeholders, glossary: gl.placeholders },
+                                        pointer: { fileIndex, partIndex, key: 'gap_text_keys', keyIndex: keyIndex },
+                                        sourceRaw: src,
+                                        tmKey: this.tm.key(src, ctx)
+                                    });
+                                }
+                            });
+                        }
+
                         if (part.stem && part.choices && part.choices.length > 0) {
                             const srcParts = [];
                             const lockPlaceholders = [];
@@ -1338,7 +1397,7 @@
                             });
                         }
 
-                        if (part.answer) {
+                        if (part.answer && typeof part.answer === 'string') {
                             const src = part.answer;
                             const prot = this.quality.protectSegments(src);
                             const gl = applyGlossary(prot.protectedText);
@@ -1404,10 +1463,12 @@
                                       ...this.quality.qa.checkSeparator(final_text, SEP_REGEX),
                                       ...this.quality.qa.checkHtmlBalance(final_text));
 
-                        const { fileIndex, partIndex, key } = job.pointer;
+                        const { fileIndex, partIndex, key, keyIndex } = job.pointer;
                         if (key === 'statement') this.state.translatedJsonData[fileIndex].data.statement = final_text;
                         else if (key === 'answer') this.state.translatedJsonData[fileIndex].data.parts[partIndex].answer = final_text;
                         else if (key === 'stem') this.state.translatedJsonData[fileIndex].data.parts[partIndex].stem = final_text;
+                        else if (key === 'gap_text_keys') this.state.translatedJsonData[fileIndex].data.parts[partIndex].gap_text_keys[keyIndex].value = final_text;
+
 
                         const srcKey = job.sourceRaw;
                         if (useTM && srcKey) this.tm.put(srcKey, ctx, final_text);
@@ -1459,8 +1520,9 @@
                         if (d.statement != null) pushItem({ fileIndex, key: 'statement' }, d.statement);
                         d.parts?.forEach((p, partIndex) => {
                             if (p.stem != null) pushItem({ fileIndex, partIndex, key: 'stem' }, p.stem);
-                            if (p.answer != null) pushItem({ fileIndex, partIndex, key: 'answer' }, p.answer);
+                            if (p.answer != null && typeof p.answer === 'string') pushItem({ fileIndex, partIndex, key: 'answer' }, p.answer);
                             p.choices?.forEach((c, choiceIndex) => pushItem({ fileIndex, partIndex, choiceIndex, key: 'choice' }, c.html_content));
+                            p.gap_text_keys?.forEach((k, keyIndex) => pushItem({ fileIndex, partIndex, keyIndex, key: 'gap_text_key'}, k.value));
                         });
                     });
 
@@ -1469,11 +1531,12 @@
                         const meta = backMap.get(id); if (!meta) return;
                         let cleaned = this.quality.restoreSegments(text, meta.locks);
                         cleaned = this.quality.normalizeArabicPunct(this.quality.enforceUnits(cleaned));
-                        const { fileIndex, partIndex, choiceIndex, key } = meta.pointer;
+                        const { fileIndex, partIndex, choiceIndex, keyIndex, key } = meta.pointer;
                         if (key === 'statement') this.state.translatedJsonData[fileIndex].data.statement = cleaned;
                         else if (key === 'stem') this.state.translatedJsonData[fileIndex].data.parts[partIndex].stem = cleaned;
                         else if (key === 'answer') this.state.translatedJsonData[fileIndex].data.parts[partIndex].answer = cleaned;
                         else if (key === 'choice') this.state.translatedJsonData[fileIndex].data.parts[partIndex].choices[choiceIndex].html_content = cleaned;
+                        else if (key === 'gap_text_key') this.state.translatedJsonData[fileIndex].data.parts[partIndex].gap_text_keys[keyIndex].value = cleaned;
                     });
 
                     this.ui.showAlert('تم التدقيق اللغوي الآلي بنجاح ✅', 'success', 4000);
@@ -1513,8 +1576,10 @@
                 TranslatorApp.state.originalJsonData.forEach(file => {
                     count(file.data.statement);
                     file.data.parts?.forEach(part => {
-                        count(part.stem); count(part.answer);
+                        count(part.stem); 
+                        if(typeof part.answer === 'string') count(part.answer);
                         part.choices?.forEach(choice => count(choice.html_content));
+                        part.gap_text_keys?.forEach(keyItem => count(keyItem.value));
                     });
                 });
                 const timeElapsed = TranslatorApp.state.startTime ? ((Date.now() - TranslatorApp.state.startTime) / 1000).toFixed(1) : 0;
@@ -1601,19 +1666,14 @@
         preview: {
             dmp: new diff_match_patch(),
 
-            // --- MATHLIVE INTEGRATION START ---
             renderContentWithMath(htmlString) {
                 if (typeof htmlString !== 'string' || !htmlString) {
                     return '<p dir="rtl">&nbsp;</p>';
                 }
-
-                // This regex finds both inline ($...$) and display ($$...$$) LaTeX
                 const latexRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
                 const parts = htmlString.split(latexRegex);
-
                 const content = parts.map(part => {
                     if (!part) return '';
-                    // Check if the part is a LaTeX expression
                     if (part.startsWith('$$') && part.endsWith('$$')) {
                         const latex = part.slice(2, -2).replace(/"/g, '&quot;');
                         return `<math-field default-mode="math" value="${latex}"></math-field>`;
@@ -1622,10 +1682,8 @@
                         const latex = part.slice(1, -1).replace(/"/g, '&quot;');
                         return `<math-field default-mode="inline-math" value="${latex}"></math-field>`;
                     }
-                    // Otherwise, it's just plain text/HTML, sanitize and wrap it
                     return `<span>${TranslatorApp.security.sanitize(part)}</span>`;
                 }).join('');
-                
                 return `<p dir="rtl">${content}</p>`;
             },
             
@@ -1636,14 +1694,15 @@
                 const path = fieldContainer.dataset.path;
                 const fileIndex = parseInt(fieldContainer.dataset.fileIndex, 10);
                 
-                // Reconstruct the full string from the mixed content (text + math fields)
                 let newContent = '';
                 fieldContainer.querySelector('p').childNodes.forEach(node => {
                     if (node.tagName === 'SPAN') {
-                        newContent += node.textContent;
+                        newContent += node.innerHTML;
                     } else if (node.tagName === 'MATH-FIELD') {
                         const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
                         newContent += `${delimiter}${node.value}${delimiter}`;
+                    } else if (node.nodeType === Node.TEXT_NODE) {
+                        newContent += node.textContent;
                     }
                 });
                 
@@ -1655,7 +1714,6 @@
                     statusEl.title = 'تم التعديل يدوياً';
                 }
             },
-            // --- MATHLIVE INTEGRATION END ---
 
             render() {
                 const { previewContainer } = TranslatorApp.dom;
@@ -1690,6 +1748,17 @@
                     
                     this.generateInitialDiffs(fileIndex);
                 });
+            },
+
+            renderReadOnlyField(label, value) {
+                if (value === undefined || value === null) return '';
+                // **IMPROVEMENT**: Handle arrays by joining them for display
+                const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+                return `
+                    <div class="border rounded-lg p-4" style="border-color: var(--card-border);">
+                        <h5 class="font-bold flex items-center mb-2">${label}</h5>
+                        <div class="p-3 rounded-lg text-sm" style="background-color: var(--bg-color); color: var(--secondary-text);">${TranslatorApp.security.sanitize(displayValue)}</div>
+                    </div>`;
             },
 
             renderFileContent(data, fileIndex) {
@@ -1735,16 +1804,32 @@
 
                 data.parts?.forEach((part, partIndex) => {
                     html += '<div class="border-t pt-4 mt-4 space-y-4" style="border-color: var(--card-border);">';
-                    html += `<h5 class="font-semibold text-md" style="color: var(--secondary-text);">الجزء ${partIndex + 1}</h5>`;
+                    html += `<h5 class="font-semibold text-md" style="color: var(--secondary-text);">الجزء ${partIndex + 1} (النوع: ${part.type || 'غير محدد'})</h5>`;
                     const originalPart = TranslatorApp.state.originalJsonData[fileIndex].data.parts[partIndex];
                     
                     html += renderField('السؤال (Stem)', originalPart.stem, part.stem, `parts.${partIndex}.stem`);
-                    html += renderField('الإجابة (Answer)', originalPart.answer, part.answer, `parts.${partIndex}.answer`);
+                    
+                    if (originalPart.answer) {
+                        if (typeof originalPart.answer === 'string') {
+                            html += renderField('الإجابة (Answer)', originalPart.answer, part.answer, `parts.${partIndex}.answer`);
+                        } else if (typeof originalPart.answer === 'object' && originalPart.answer.hasOwnProperty('value')) {
+                            html += this.renderReadOnlyField('الإجابة (Answer - غير قابلة للترجمة)', originalPart.answer.value);
+                        } else {
+                             html += this.renderReadOnlyField('الإجابة (Answer - غير قابلة للترجمة)', JSON.stringify(originalPart.answer));
+                        }
+                    }
                     
                     part.choices?.forEach((choice, choiceIndex) => {
                         const originalChoice = originalPart.choices[choiceIndex];
                         html += renderField(`خيار ${choiceIndex + 1}`, originalChoice.html_content, choice.html_content, `parts.${partIndex}.choices.${choiceIndex}.html_content`);
                     });
+
+                    // **IMPROVEMENT**: Render gap_text_keys for translation
+                    part.gap_text_keys?.forEach((keyItem, keyIndex) => {
+                        const originalKeyItem = originalPart.gap_text_keys[keyIndex];
+                        html += renderField(`كلمة الفراغ ${keyIndex + 1}`, originalKeyItem.value, keyItem.value, `parts.${partIndex}.gap_text_keys.${keyIndex}.value`);
+                    });
+
                     html += '</div>';
                 });
 
@@ -1773,9 +1858,12 @@
                 processPath('statement');
                 originalData.parts?.forEach((part, partIndex) => {
                     processPath(`parts.${partIndex}.stem`);
-                    processPath(`parts.${partIndex}.answer`);
+                    if(typeof part.answer === 'string') processPath(`parts.${partIndex}.answer`);
                     part.choices?.forEach((choice, choiceIndex) => {
                         processPath(`parts.${partIndex}.choices.${choiceIndex}.html_content`);
+                    });
+                     part.gap_text_keys?.forEach((keyItem, keyIndex) => {
+                        processPath(`parts.${partIndex}.gap_text_keys.${keyIndex}.value`);
                     });
                 });
             },
@@ -1815,11 +1903,10 @@
             copyOriginalText(button) {
                 const fieldContainer = button.closest('.border').querySelector('.original-text-readonly');
                 if (fieldContainer) {
-                    const textToCopy = fieldContainer.innerText;
+                    const textToCopy = fieldContainer.innerHTML;
                     const textArea = document.createElement('textarea');
                     textArea.value = textToCopy;
                     
-                    // Make the textarea out of sight
                     textArea.style.position = 'fixed';
                     textArea.style.top = '0';
                     textArea.style.left = '0';
@@ -1899,6 +1986,13 @@
                                         }
                                     });
                                 }
+                                if (part.gap_text_keys) {
+                                     part.gap_text_keys.forEach((keyItem, keyIndex) => {
+                                        if (translatedPart.gap_text_keys && translatedPart.gap_text_keys[keyIndex]) {
+                                            keyItem.value = translatedPart.gap_text_keys[keyIndex].value;
+                                        }
+                                    });
+                                }
                             }
                         });
                     }
@@ -1964,9 +2058,16 @@
                     originalFile.data.parts.forEach((part, partIndex) => {
                         const translatedPart = translatedFile.data.parts[partIndex];
                         addRow(partIndex + 1, 'stem', part.stem, translatedPart.stem);
-                        addRow(partIndex + 1, 'answer', part.answer, translatedPart.answer);
+                        if(typeof part.answer === 'string') {
+                            addRow(partIndex + 1, 'answer', part.answer, translatedPart.answer);
+                        } else if (part.answer && typeof part.answer === 'object' && part.answer.hasOwnProperty('value')) {
+                            addRow(partIndex + 1, 'answer', part.answer.value, translatedPart.answer.value);
+                        }
                         part.choices.forEach((choice, choiceIndex) => {
                             addRow(partIndex + 1, `choice_${choiceIndex + 1}`, choice.html_content, translatedPart.choices[choiceIndex].html_content);
+                        });
+                        part.gap_text_keys?.forEach((keyItem, keyIndex) => {
+                             addRow(partIndex + 1, `gap_text_key_${keyIndex + 1}`, keyItem.value, translatedPart.gap_text_keys[keyIndex].value);
                         });
                     });
                 });
