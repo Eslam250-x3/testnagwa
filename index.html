@@ -79,9 +79,8 @@
 
         /* Styles for MathLive Fields */
         .editable-preview-field { background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 0.5rem; padding: 0.75rem; min-height: 80px; }
-        .editable-preview-field:focus-within { box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
         math-field { border: 1px solid var(--input-border); padding: 2px 5px; border-radius: 4px; font-size: 1.1em; display: inline-block; background: var(--input-bg); min-width: 20px; margin: 2px; }
-        math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); }
+        math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -425,10 +424,10 @@
             this.dom.gradeSelect.addEventListener('change', this.subjects.onGradeChange.bind(this.subjects));
             this.dom.applyPromptBtn.addEventListener('click', this.subjects.apply.bind(this.subjects));
 
+            // Event delegation for MathLive field updates
             this.dom.previewContainer.addEventListener('input', (e) => {
-                const editableField = e.target.closest('.editable-preview-field');
-                if (editableField) {
-                    this.preview.handleFieldUpdate(editableField);
+                if (e.target.tagName.toLowerCase() === 'math-field') {
+                    this.preview.handleMathFieldUpdate(e.target);
                 }
             });
         },
@@ -505,6 +504,7 @@
                     } else if (typeof obj === 'object') {
                         Object.keys(obj).forEach(key => {
                             const value = obj[key];
+                            // **IMPROVEMENT**: More specific keys to check for translatable content
                             const translatableKeys = ['stem', 'html_content', 'answer', 'statement'];
                             if (translatableKeys.includes(key) && typeof value === 'string') {
                                 const plain = toPlain(value);
@@ -610,7 +610,7 @@
                 if (window.DOMPurify) {
                     return DOMPurify.sanitize(html, {
                         ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field', 'audio'],
-                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'controls'] // REMOVED read-only from here
+                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'read-only', 'controls']
                     });
                 }
                 return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
@@ -1332,6 +1332,7 @@
                         });
                     }
                     file.data.parts?.forEach((part, partIndex) => {
+                        // **IMPROVEMENT**: Handle gapText questions by translating the 'value' in 'gap_text_keys'
                         if (part.type === 'gapText' && Array.isArray(part.gap_text_keys)) {
                             part.gap_text_keys.forEach((keyItem, keyIndex) => {
                                 if (keyItem && typeof keyItem.value === 'string') {
@@ -1664,7 +1665,6 @@
         
         preview: {
             dmp: new diff_match_patch(),
-            updateTimeout: null,
 
             renderContentWithMath(htmlString) {
                 if (typeof htmlString !== 'string' || !htmlString) {
@@ -1687,35 +1687,32 @@
                 return `<p dir="rtl">${content}</p>`;
             },
             
-            handleFieldUpdate(fieldContainer) {
-                if (this.updateTimeout) clearTimeout(this.updateTimeout);
-                this.updateTimeout = setTimeout(() => {
-                    const path = fieldContainer.dataset.path;
-                    const fileIndex = parseInt(fieldContainer.dataset.fileIndex, 10);
-                    
-                    let newContent = '';
-                    const contentParagraph = fieldContainer.querySelector('p');
-                    if (!contentParagraph) return;
-
-                    contentParagraph.childNodes.forEach(node => {
-                        if (node.tagName === 'SPAN') {
-                            newContent += node.innerHTML;
-                        } else if (node.tagName === 'MATH-FIELD') {
-                            const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
-                            newContent += `${delimiter}${node.value}${delimiter}`;
-                        } else if (node.nodeType === Node.TEXT_NODE) {
-                            newContent += node.textContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        }
-                    });
-                    
-                    this.updateData(fileIndex, path, newContent);
-                    this.updateDiff(fileIndex, path);
-                    const statusEl = document.getElementById(`status-field-${fileIndex}-${path.replace(/\./g, '-')}`);
-                    if(statusEl) {
-                        statusEl.className = 'status-dot status-edited';
-                        statusEl.title = 'تم التعديل يدوياً';
+            handleMathFieldUpdate(mathFieldElement) {
+                const fieldContainer = mathFieldElement.closest('.editable-preview-field');
+                if (!fieldContainer) return;
+                
+                const path = fieldContainer.dataset.path;
+                const fileIndex = parseInt(fieldContainer.dataset.fileIndex, 10);
+                
+                let newContent = '';
+                fieldContainer.querySelector('p').childNodes.forEach(node => {
+                    if (node.tagName === 'SPAN') {
+                        newContent += node.innerHTML;
+                    } else if (node.tagName === 'MATH-FIELD') {
+                        const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
+                        newContent += `${delimiter}${node.value}${delimiter}`;
+                    } else if (node.nodeType === Node.TEXT_NODE) {
+                        newContent += node.textContent;
                     }
-                }, 300);
+                });
+                
+                this.updateData(fileIndex, path, newContent);
+                this.updateDiff(fileIndex, path);
+                const statusEl = document.getElementById(`status-field-${fileIndex}-${path.replace(/\./g, '-')}`);
+                if(statusEl) {
+                    statusEl.className = 'status-dot status-edited';
+                    statusEl.title = 'تم التعديل يدوياً';
+                }
             },
 
             render() {
@@ -1755,6 +1752,7 @@
 
             renderReadOnlyField(label, value) {
                 if (value === undefined || value === null) return '';
+                // **IMPROVEMENT**: Handle arrays by joining them for display
                 const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
                 return `
                     <div class="border rounded-lg p-4" style="border-color: var(--card-border);">
@@ -1788,7 +1786,6 @@
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--success-color);">المترجم (قابل للتعديل)</p>
                                     <div id="${fieldId}" 
-                                         contenteditable="true"
                                          class="editable-preview-field"
                                          data-path="${path}"
                                          data-file-index="${fileIndex}">
@@ -1827,6 +1824,7 @@
                         html += renderField(`خيار ${choiceIndex + 1}`, originalChoice.html_content, choice.html_content, `parts.${partIndex}.choices.${choiceIndex}.html_content`);
                     });
 
+                    // **IMPROVEMENT**: Render gap_text_keys for translation
                     part.gap_text_keys?.forEach((keyItem, keyIndex) => {
                         const originalKeyItem = originalPart.gap_text_keys[keyIndex];
                         html += renderField(`كلمة الفراغ ${keyIndex + 1}`, originalKeyItem.value, keyItem.value, `parts.${partIndex}.gap_text_keys.${keyIndex}.value`);
