@@ -9,6 +9,8 @@
     
     <!-- MathLive for LaTeX editing -->
     <script src="https://unpkg.com/mathlive"></script>
+        <!-- Fabric.js for simple image annotation/editor -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     
     <!-- DOMPurify for security -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
@@ -226,6 +228,7 @@
                     <div class="flex items-center gap-2">
                         <button id="undoBtn" disabled class="px-3 py-2 rounded-lg disabled:opacity-50">↩️ تراجع</button>
                         <button id="redoBtn" disabled class="px-3 py-2 rounded-lg disabled:opacity-50">↪️ إعادة</button>
+                        <button id="openAnnotatorBtn" class="px-3 py-2 rounded-lg" title="تحرير النص فوق الصور (أرقام/رموز)">🖊️ محرر الصور</button>
                     </div>
                 </div>
                 <div class="preview-controls my-4 p-4 rounded-lg" style="background-color: color-mix(in srgb, var(--primary-color) 5%, var(--card-bg));">
@@ -253,6 +256,21 @@
     </div>
 
     <!-- Modals (Glossary, Mapped IDs, Subjects) -->
+        <!-- Image Annotator Modal -->
+        <div id="imageAnnotatorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="main-card rounded-2xl shadow-xl p-4 w-full max-w-4xl">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xl font-bold" style="color: var(--primary-color);">تحرير نص فوق الصورة</h3>
+                    <button id="imageAnnotatorClose" class="text-2xl">&times;</button>
+                </div>
+                <div class="w-full overflow-auto" style="max-height:70vh">
+                    <canvas id="imageAnnotatorCanvas" class="w-full border" style="border-color: var(--card-border);"></canvas>
+                </div>
+                <div class="flex justify-end gap-2 mt-3">
+                    <button id="imageAnnotatorSave" class="px-4 py-2 rounded-lg text-white" style="background-color: var(--success-color);">حفظ</button>
+                </div>
+            </div>
+        </div>
     <div id="glossaryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="main-card rounded-2xl shadow-xl p-6 w-full max-w-2xl transform transition-all" role="dialog" aria-labelledby="glossaryTitle">
             <div class="flex justify-between items-center">
@@ -385,6 +403,10 @@
                 importGlossaryBtn: 'importGlossaryBtn', exportGlossaryBtn: 'exportGlossaryBtn',
                 glossaryFileInput: 'glossaryFileInput', glossarySearch: 'glossarySearch',
                 glossaryCategory: 'glossaryCategory',
+                imageAnnotatorModal: 'imageAnnotatorModal',
+                imageAnnotatorCanvas: 'imageAnnotatorCanvas',
+                imageAnnotatorClose: 'imageAnnotatorClose',
+                imageAnnotatorSave: 'imageAnnotatorSave',
                 mappedIdsInput: 'mappedIdsInput', useMappedIdsCheckbox: 'useMappedIdsCheckbox',
                 manageIdsBtn: 'manageIdsBtn', mappedIdsModal: 'mappedIdsModal',
                 closeMappedIdsModalBtn: 'closeMappedIdsModalBtn',
@@ -443,6 +465,12 @@
             this.dom.subjectSelect.addEventListener('change', this.subjects.onSubjectChange.bind(this.subjects));
             this.dom.gradeSelect.addEventListener('change', this.subjects.onGradeChange.bind(this.subjects));
             this.dom.applyPromptBtn.addEventListener('click', this.subjects.apply.bind(this.subjects));
+
+            // Image annotator events
+            const openAnnotatorBtn = document.getElementById('openAnnotatorBtn');
+            if (openAnnotatorBtn) openAnnotatorBtn.addEventListener('click', this.annotator.open.bind(this.annotator));
+            this.dom.imageAnnotatorClose.addEventListener('click', this.annotator.close.bind(this.annotator));
+            this.dom.imageAnnotatorSave.addEventListener('click', this.annotator.save.bind(this.annotator));
 
             // Event delegation for all preview field updates
             this.dom.previewContainer.addEventListener('input', (e) => {
@@ -1675,6 +1703,7 @@
             showGlossaryModal(show) { TranslatorApp.dom.glossaryModal.classList.toggle('hidden', !show); },
             showMappedIdsModal(show) { TranslatorApp.dom.mappedIdsModal.classList.toggle('hidden', !show); },
             showSubjectsModal(show) { TranslatorApp.dom.subjectsModal.classList.toggle('hidden', !show); },
+            showModal(id, show) { const el = TranslatorApp.dom[id]; if (el) el.classList.toggle('hidden', !show); },
             renderGlossaryList(list) {
                 const c = TranslatorApp.dom.glossaryListContainer;
                 c.innerHTML = '';
@@ -2204,6 +2233,50 @@
                 const link = document.createElement("a"); link.href = url; link.download = `translated_data_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
                 document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
                 TranslatorApp.ui.showAlert('تم إنشاء ملف CSV بنجاح!', 'success');
+            }
+        }
+        ,
+        annotator: {
+            canvas: null,
+            fabricCanvas: null,
+            currentImage: null,
+            open() {
+                const images = TranslatorApp.dom.previewContainer.querySelectorAll('img');
+                if (!images.length) { TranslatorApp.ui.showAlert('لا توجد صور في الصفحة الحالية.', 'info'); return; }
+                // Use the first image in view for simplicity
+                this.currentImage = images[0];
+                TranslatorApp.ui.showModal('imageAnnotatorModal', true);
+                setTimeout(() => this.initCanvas(), 0);
+            },
+            close() { TranslatorApp.ui.showModal('imageAnnotatorModal', false); },
+            initCanvas() {
+                const canvasEl = TranslatorApp.dom.imageAnnotatorCanvas;
+                const img = this.currentImage;
+                if (!canvasEl || !img) return;
+                canvasEl.width = img.naturalWidth || img.width;
+                canvasEl.height = img.naturalHeight || img.height;
+                this.fabricCanvas = new fabric.Canvas(canvasEl, { selection: true });
+                fabric.Image.fromURL(img.src, (oImg) => {
+                    oImg.selectable = false; oImg.evented = false; oImg.scaleToWidth(canvasEl.width);
+                    this.fabricCanvas.add(oImg).sendToBack(oImg);
+                }, { crossOrigin: 'anonymous' });
+                // Add helper text tool with RTL support
+                this.fabricCanvas.on('mouse:dblclick', (e) => {
+                    const pointer = this.fabricCanvas.getPointer(e.e);
+                    const textbox = new fabric.Textbox('نص', {
+                        left: pointer.x, top: pointer.y, fontSize: 24, fill: '#111827', backgroundColor: 'rgba(255,255,255,0.7)'
+                    });
+                    this.fabricCanvas.add(textbox).setActiveObject(textbox);
+                });
+            },
+            save() {
+                if (!this.fabricCanvas) return;
+                const dataUrl = this.fabricCanvas.toDataURL({ format: 'png', quality: 1 });
+                // Replace the image in preview with annotated version (non-destructive – just in UI)
+                this.currentImage.src = dataUrl;
+                TranslatorApp.state.hasUnsavedChanges = true;
+                this.close();
+                TranslatorApp.ui.showAlert('تم حفظ التعديلات على الصورة (محلياً).', 'success');
             }
         }
     };
