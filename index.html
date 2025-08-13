@@ -623,7 +623,7 @@
                 if (window.DOMPurify) {
                     return DOMPurify.sanitize(html, {
                         ALLOWED_TAGS: ['b','i','u','em','strong','sub','sup','br','span','p','ul','ol','li','img','a','code','pre','table','tr','td','th','thead','tbody','math', 'div', 'math-field', 'audio'],
-                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'read-only', 'controls']
+                        ALLOWED_ATTR: ['href','src','alt','title','class','style', 'dir', 'value', 'default-mode', 'data-path', 'data-file-index', 'data-blank', 'read-only', 'controls', 'virtual-keyboard-mode', 'use-shared-virtual-keyboard']
                     });
                 }
                 return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
@@ -1208,13 +1208,24 @@
                 const messages = [];
                 if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
                 messages.push({ role: 'user', content: `${userInstruction}\n\nPayload:\n${JSON.stringify(payload)}` });
-                const response = await fetch(apiUrl, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, signal,
-                    body: JSON.stringify({ model: 'gpt-4.1-turbo', messages, temperature: 0.2, response_format: { type: "json_object" } })
-                });
-                if (!response.ok) { let err; try { err = await response.json(); } catch {} throw new Error(`ChatGPT API Error: ${err?.error?.message || response.statusText}`); }
-                const data = await response.json();
-                return data.choices?.[0]?.message?.content || '';
+                const candidateModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'];
+                let lastError = null;
+                for (const model of candidateModels) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, signal,
+                            body: JSON.stringify({ model, messages, temperature: 0.2, response_format: { type: "json_object" } })
+                        });
+                        if (!response.ok) {
+                            let err; try { err = await response.json(); } catch {}
+                            lastError = new Error(`ChatGPT API Error: ${err?.error?.message || response.statusText}`);
+                            continue;
+                        }
+                        const data = await response.json();
+                        return data.choices?.[0]?.message?.content || '';
+                    } catch (e) { lastError = e; }
+                }
+                throw lastError || new Error('ChatGPT API Error: Unable to complete request');
             },
             async withLocalModelJSON(systemPrompt, userInstruction, payload, url, modelName, signal) {
                 const fullPrompt = `${systemPrompt || ''}\n\n${userInstruction}\n\nPayload:\n${JSON.stringify(payload)}\n\nReturn ONLY JSON.`;
@@ -1239,13 +1250,20 @@
                 const apiUrl = 'https://api.openai.com/v1/chat/completions';
                 const messages = []; if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
                 messages.push({ role: 'user', content: userPrompt });
-                const response = await fetch(apiUrl, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, signal,
-                    body: JSON.stringify({ model: 'gpt-4.1-turbo', messages, temperature: 0.2 })
-                });
-                if (!response.ok) { const err = await response.json(); throw new Error(`ChatGPT API Error: ${err.error?.message || response.statusText}`); }
-                const data = await response.json();
-                return data.choices?.[0]?.message?.content || '';
+                const candidateModels = ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'];
+                let lastError = null;
+                for (const model of candidateModels) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` }, signal,
+                            body: JSON.stringify({ model, messages, temperature: 0.2 })
+                        });
+                        if (!response.ok) { const err = await response.json(); lastError = new Error(`ChatGPT API Error: ${err.error?.message || response.statusText}`); continue; }
+                        const data = await response.json();
+                        return data.choices?.[0]?.message?.content || '';
+                    } catch (e) { lastError = e; }
+                }
+                throw lastError || new Error('ChatGPT API Error: Unable to complete request');
             },
             async withLocalModelText(systemPrompt, userPrompt, url, modelName, signal) {
                 const response = await fetch(url, {
@@ -1683,6 +1701,8 @@
                 if (typeof htmlString !== 'string' || !htmlString) {
                     return '<div class="content-root" dir="rtl">&nbsp;</div>';
                 }
+                // 1) Keep any pre-existing <math-field> as-is to avoid double-wrapping
+                htmlString = htmlString.replace(/<math-field[\s\S]*?<\/math-field>/gi, (m) => `__MATHFIELD__${btoa(unescape(encodeURIComponent(m)))}__`);
                 const latexRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
                 const parts = htmlString.split(latexRegex);
                 const content = parts.map(part => {
@@ -1703,7 +1723,11 @@
                     const hasBlock = /<\s*(table|ul|ol|li|div|p|pre|code|thead|tbody|tr|td|th|img|audio)\b/i.test(sanitized);
                     return hasBlock ? sanitized : `<span>${sanitized}</span>`;
                 }).join('');
-                return `<div class="content-root" dir="rtl">${content}</div>`;
+                // 2) Restore original math-field fragments
+                const restored = content.replace(/__MATHFIELD__([A-Za-z0-9+/=]+)__/g, (_, b64) => {
+                    try { return decodeURIComponent(escape(atob(b64))); } catch { return ''; }
+                });
+                return `<div class="content-root" dir="rtl">${restored}</div>`;
             },
 
             // Convert plain chemical formulas (e.g., NaHCO3, H2SO4, Ca(OH)2) into inline math-fields
@@ -1753,7 +1777,12 @@
                         }
                     } else if (node.tagName === 'MATH-FIELD') {
                         const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
-                        newContent += `${delimiter}${node.value}${delimiter}`;
+                        // If the math-field was originally from the source (read-only attr present), preserve element HTML
+                        if (node.hasAttribute('data-origin') || node.getAttribute('read-only') === 'true') {
+                            newContent += node.outerHTML;
+                        } else {
+                            newContent += `${delimiter}${node.value}${delimiter}`;
+                        }
                     } else if (node.nodeType === Node.ELEMENT_NODE) {
                         // Preserve any other HTML element (e.g., table, div)
                         newContent += node.outerHTML;
