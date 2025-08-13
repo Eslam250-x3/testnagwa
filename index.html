@@ -81,6 +81,8 @@
         .editable-preview-field { background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 0.5rem; padding: 0.75rem; min-height: 80px; }
         math-field { border: 1px solid var(--input-border); padding: 2px 5px; border-radius: 4px; font-size: 1.1em; display: inline-block; background: var(--input-bg); min-width: 20px; margin: 2px; }
         math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
+            /* Visual blank for underscores in preview (does not persist to JSON) */
+            .blank-slot { display: inline-block; min-width: 1.8em; border-bottom: 2px solid currentColor; vertical-align: baseline; line-height: 1.2; margin: 0 0.15em; }
     </style>
 </head>
 <body class="text-gray-800">
@@ -344,6 +346,12 @@
             this.shortcuts.init();
             this.autoSave.init();
             this.addBeforeUnloadGuard();
+            // Initialize shared MathLive virtual keyboard if available
+            try {
+                if (window.MathfieldElement && typeof MathfieldElement.makeSharedVirtualKeyboard === 'function') {
+                    MathfieldElement.makeSharedVirtualKeyboard();
+                }
+            } catch {}
         },
 
         cacheDomElements() {
@@ -1677,15 +1685,47 @@
                     if (!part) return '';
                     if (part.startsWith('$$') && part.endsWith('$$')) {
                         const latex = part.slice(2, -2).replace(/"/g, '&quot;');
-                        return `<math-field default-mode="math" value="${latex}"></math-field>`;
+                        return `<math-field default-mode="math" value="${latex}" virtual-keyboard-mode="onfocus" use-shared-virtual-keyboard dir="ltr"></math-field>`;
                     }
                     if (part.startsWith('$') && part.endsWith('$')) {
                         const latex = part.slice(1, -1).replace(/"/g, '&quot;');
-                        return `<math-field default-mode="inline-math" value="${latex}"></math-field>`;
+                        return `<math-field default-mode="inline-math" value="${latex}" virtual-keyboard-mode="onfocus" use-shared-virtual-keyboard dir="ltr"></math-field>`;
                     }
-                    return `<span>${TranslatorApp.security.sanitize(part)}</span>`;
+                    // Inject editable math-fields for common chemical formulas in plain text
+                    let injected = this.injectChemistryMathFields(part);
+                    // Decorate blanks ___ to visible slots (preview-only)
+                    injected = this.decorateBlanks(injected);
+                    return `<span>${TranslatorApp.security.sanitize(injected)}</span>`;
                 }).join('');
                 return `<p dir="rtl">${content}</p>`;
+            },
+
+            // Convert plain chemical formulas (e.g., NaHCO3, H2SO4, Ca(OH)2) into inline math-fields
+            injectChemistryMathFields(text) {
+                if (!text || typeof text !== 'string') return text;
+                const escapeAttr = (s) => (s || '').replace(/"/g, '&quot;');
+                // Basic LaTeX conversion: element digits -> _{digits}, parenthesis digits -> _{digits}
+                const toLatex = (formula) => {
+                    let out = formula;
+                    out = out.replace(/([A-Za-z][a-z]?)\s*(\d+)/g, '$1_{$2}');
+                    out = out.replace(/\)(\d+)/g, ')_{$1}');
+                    return out;
+                };
+                // Regex for typical chemical formula tokens
+                const chemRegex = /\b(?:[A-Z][a-z]?\d*)+(?:\([A-Za-z\d]+\)\d*)*\b/g;
+                return text.replace(chemRegex, (match) => {
+                    // Avoid converting if already inside an HTML tag like <span> or attributes
+                    // Heuristic: skip if match is immediately preceded by '&' (entity) or within a tag
+                    // Since we sanitize later and we run on plain text chunks, this is usually safe
+                    const latex = escapeAttr(toLatex(match));
+                    return `<math-field default-mode="inline-math" value="${latex}" virtual-keyboard-mode="onfocus" use-shared-virtual-keyboard dir="ltr"></math-field>`;
+                });
+            },
+
+            decorateBlanks(text) {
+                if (!text || typeof text !== 'string') return text;
+                // Replace sequences of 3+ underscores with a visual blank slot
+                return text.replace(/_{3,}/g, (m) => `<span class="blank-slot" data-blank="${'_'.repeat(m.length)}"></span>`);
             },
             
             handlePreviewFieldUpdate(fieldContainer) {
@@ -1697,7 +1737,13 @@
                 let newContent = '';
                 fieldContainer.querySelector('p').childNodes.forEach(node => {
                     if (node.tagName === 'SPAN') {
-                        newContent += node.innerHTML;
+                        // If span is a preview blank-slot, persist original underscores length
+                        if (node.classList && node.classList.contains('blank-slot')) {
+                            const raw = node.getAttribute('data-blank') || '___';
+                            newContent += raw;
+                        } else {
+                            newContent += node.innerHTML;
+                        }
                     } else if (node.tagName === 'MATH-FIELD') {
                         const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
                         newContent += `${delimiter}${node.value}${delimiter}`;
