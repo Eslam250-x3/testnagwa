@@ -79,7 +79,15 @@
 
         /* Styles for MathLive Fields */
         .editable-preview-field { background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 0.5rem; padding: 0.75rem; min-height: 80px; }
+        /* MathLive default look (editable) */
         math-field { border: 1px solid var(--input-border); padding: 2px 6px; border-radius: 4px; font-size: 1.1em; display: inline-block; background: var(--input-bg); min-width: 20px; margin: 2px; max-width: 100%; white-space: nowrap; }
+        /* Higher-fidelity preview to match source system: make formulas look inline and unboxed inside preview */
+        .editable-preview-field math-field { border: 0; background: transparent; padding: 0 2px; box-shadow: none; }
+        .editable-preview-field .content-root { line-height: 1.8; }
+        .editable-preview-field .content-root p { margin: .25rem 0; }
+        /* Approximate Lexical theme blocks so content spacing matches original */
+        .LexicalTheme__paragraph { white-space: pre-wrap; margin: .25rem 0; }
+        .LexicalTheme__image img { max-width: 100%; height: auto; }
         math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
             /* Visual blank for underscores in preview (does not persist to JSON) */
             .blank-slot { display: inline-block; min-width: 1.8em; border-bottom: 2px solid currentColor; vertical-align: baseline; line-height: 1.2; margin: 0 0.15em; }
@@ -441,6 +449,20 @@
                 const fieldContainer = e.target.closest('.editable-preview-field');
                 if (fieldContainer) {
                     this.preview.handlePreviewFieldUpdate(fieldContainer);
+                }
+            });
+            // Ensure MathLive keyboard opens for inline chemistry/math on focus
+            this.dom.previewContainer.addEventListener('pointerdown', (e) => {
+                const mf = e.target && e.target.closest && e.target.closest('math-field');
+                if (mf) {
+                    try {
+                        mf.removeAttribute('read-only');
+                        mf.setAttribute('virtual-keyboard-mode', 'onfocus');
+                        mf.setAttribute('use-shared-virtual-keyboard', '');
+                        if (typeof mf.executeCommand === 'function') mf.executeCommand('showVirtualKeyboard');
+                        mf.focus();
+                        e.stopPropagation();
+                    } catch {}
                 }
             });
         },
@@ -1719,7 +1741,9 @@
                     let injected = this.injectChemistryMathFields(part);
                     // Decorate blanks ___ to visible slots (preview-only)
                     injected = this.decorateBlanks(injected);
-                    const sanitized = TranslatorApp.security.sanitize(injected);
+                    const sanitized = TranslatorApp.security.sanitize(injected)
+                        // normalize multiplication sign to match system rendering
+                        .replace(/\bx\b/g, '×');
                     const hasBlock = /<\s*(table|ul|ol|li|div|p|pre|code|thead|tbody|tr|td|th|img|audio)\b/i.test(sanitized);
                     return hasBlock ? sanitized : `<span>${sanitized}</span>`;
                 }).join('');
@@ -1833,6 +1857,8 @@
                     
                     this.generateInitialDiffs(fileIndex);
                 });
+                // Activate MathLive keyboard for all math-fields in preview
+                this.prepareInteractiveMathFields();
             },
 
             renderReadOnlyField(label, value) {
@@ -1973,6 +1999,21 @@
                 const cleanTranslated = this.plainTextForDiff(translatedText || '');
                 
                 diffContainer.innerHTML = this.createDiffHtml(cleanOriginal, cleanTranslated);
+            },
+
+            prepareInteractiveMathFields() {
+                try {
+                    const mathFields = TranslatorApp.dom.previewContainer.querySelectorAll('math-field');
+                    mathFields.forEach(mf => {
+                        mf.removeAttribute('read-only');
+                        mf.setAttribute('virtual-keyboard-mode', 'onfocus');
+                        mf.setAttribute('use-shared-virtual-keyboard', '');
+                        if (!mf.hasAttribute('dir')) mf.setAttribute('dir', 'ltr');
+                        mf.addEventListener('focus', () => {
+                            try { if (typeof mf.executeCommand === 'function') mf.executeCommand('showVirtualKeyboard'); } catch {}
+                        }, { once: false });
+                    });
+                } catch {}
             },
 
             createDiffHtml(text1, text2) {
