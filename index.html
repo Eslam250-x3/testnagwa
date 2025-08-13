@@ -1171,18 +1171,21 @@
                 const grade = TranslatorApp.dom.gradeSelect.value;
                 const wantArabic = TranslatorApp.quality.wantsArabicIndicDigits(subject, grade);
                 const digitsRule = wantArabic ? 'Use Arabic-Indic numerals (٠١٢٣٤٥٦٧٨٩).' : 'Use English numerals (0123456789).';
-                const core = [
-                    'Core rules:',
-                    '- Do NOT add or remove content.',
-                    '- Translate text content inside of HTML tags. Preserve the HTML tags themselves (e.g., <table>, <b>, <img>) and all LaTeX markup exactly as-is.',
-                    '- If present, keep placeholders __LOCK_n__ and __GLOSSARY_n__ unchanged.',
-                    `- ${digitsRule}`,
-                    `- If text contains the separator ${TranslatorApp.constants.CONTEXT_SEPARATOR}, translate each segment and preserve the separator exactly.`,
-                    '- Keep the order of choices unchanged.',
-                    '- Output in Arabic (MSA), formal tone.'
-                ].join('\n');
-                return `${base}\n\n${core}`;
-            },
+                    buildSystemPrompt() {
+                // ... (code to get base prompt)
+                const core = [
+                    'Core rules:',
+                    '- Do NOT add or remove content.',
+                    '- Translate text content inside of HTML tags. Preserve the HTML tags themselves (e.g., <table>, <b>, <img>) and all LaTeX markup exactly as-is.',
+                    '- **CRITICAL RULE: If a text segment contains no translatable prose (e.g., it is only a table of numbers, a chemical formula, or a URL), you MUST return the original text segment completely unchanged.**',
+                    '- If present, keep placeholders __LOCK_n__ and __GLOSSARY_n__ unchanged.',
+                    `- ${digitsRule}`,
+                    `- If text contains the separator ${TranslatorApp.constants.CONTEXT_SEPARATOR}, translate each segment and preserve the separator exactly.`,
+                    '- Keep the order of choices unchanged.',
+                    '- Output in Arabic (MSA), formal tone.'
+                ].join('\n');
+                return `${base}\n\n${core}`;
+            },
             async apply() {
                 TranslatorApp.state.selectedSubject = TranslatorApp.dom.subjectSelect.value;
                 TranslatorApp.state.selectedGrade = TranslatorApp.dom.gradeSelect.value;
