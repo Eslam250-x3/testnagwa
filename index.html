@@ -79,10 +79,14 @@
 
         /* Styles for MathLive Fields */
         .editable-preview-field { background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 0.5rem; padding: 0.75rem; min-height: 80px; }
-        math-field { border: 1px solid var(--input-border); padding: 2px 5px; border-radius: 4px; font-size: 1.1em; display: inline-block; background: var(--input-bg); min-width: 20px; margin: 2px; }
+        math-field { border: 1px solid var(--input-border); padding: 2px 6px; border-radius: 4px; font-size: 1.1em; display: inline-block; background: var(--input-bg); min-width: 20px; margin: 2px; max-width: 100%; white-space: nowrap; }
         math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
             /* Visual blank for underscores in preview (does not persist to JSON) */
             .blank-slot { display: inline-block; min-width: 1.8em; border-bottom: 2px solid currentColor; vertical-align: baseline; line-height: 1.2; margin: 0 0.15em; }
+        /* Tables inside editable preview */
+        .editable-preview-field table { width: 100%; border-collapse: collapse; direction: rtl; }
+        .editable-preview-field th, .editable-preview-field td { border: 1px solid var(--card-border); padding: 6px 8px; vertical-align: top; }
+        .editable-preview-field thead { background-color: color-mix(in srgb, var(--primary-color) 8%, var(--card-bg)); }
     </style>
 </head>
 <body class="text-gray-800">
@@ -1677,7 +1681,7 @@
 
             renderContentWithMath(htmlString) {
                 if (typeof htmlString !== 'string' || !htmlString) {
-                    return '<p dir="rtl">&nbsp;</p>';
+                    return '<div class="content-root" dir="rtl">&nbsp;</div>';
                 }
                 const latexRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
                 const parts = htmlString.split(latexRegex);
@@ -1695,9 +1699,11 @@
                     let injected = this.injectChemistryMathFields(part);
                     // Decorate blanks ___ to visible slots (preview-only)
                     injected = this.decorateBlanks(injected);
-                    return `<span>${TranslatorApp.security.sanitize(injected)}</span>`;
+                    const sanitized = TranslatorApp.security.sanitize(injected);
+                    const hasBlock = /<\s*(table|ul|ol|li|div|p|pre|code|thead|tbody|tr|td|th|img|audio)\b/i.test(sanitized);
+                    return hasBlock ? sanitized : `<span>${sanitized}</span>`;
                 }).join('');
-                return `<p dir="rtl">${content}</p>`;
+                return `<div class="content-root" dir="rtl">${content}</div>`;
             },
 
             // Convert plain chemical formulas (e.g., NaHCO3, H2SO4, Ca(OH)2) into inline math-fields
@@ -1735,7 +1741,8 @@
                 const fileIndex = parseInt(fieldContainer.dataset.fileIndex, 10);
                 
                 let newContent = '';
-                fieldContainer.querySelector('p').childNodes.forEach(node => {
+                const root = fieldContainer.querySelector('.content-root');
+                (root ? root.childNodes : []).forEach(node => {
                     if (node.tagName === 'SPAN') {
                         // If span is a preview blank-slot, persist original underscores length
                         if (node.classList && node.classList.contains('blank-slot')) {
@@ -1747,6 +1754,9 @@
                     } else if (node.tagName === 'MATH-FIELD') {
                         const delimiter = node.getAttribute('default-mode') === 'math' ? '$$' : '$';
                         newContent += `${delimiter}${node.value}${delimiter}`;
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        // Preserve any other HTML element (e.g., table, div)
+                        newContent += node.outerHTML;
                     } else if (node.nodeType === Node.TEXT_NODE) {
                         newContent += node.textContent;
                     }
@@ -1827,11 +1837,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--secondary-text);">الأصلي</p>
-                                    <div class="original-text-readonly p-3 rounded-lg text-sm h-full" style="background-color: var(--bg-color);">${TranslatorApp.security.sanitize(originalValue)}</div>
+                                    <div class="original-text-readonly p-3 rounded-lg text-sm h-full" style="background-color: var(--bg-color); overflow:auto;">${TranslatorApp.security.sanitize(originalValue)}</div>
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--success-color);">المترجم (قابل للتعديل)</p>
-                                    <div id="${fieldId}" 
+                                     <div id="${fieldId}" 
                                          contenteditable="true"
                                          class="editable-preview-field"
                                          data-path="${path}"
@@ -1860,7 +1870,8 @@
                         if (typeof originalPart.answer === 'string') {
                             html += renderField('الإجابة (Answer)', originalPart.answer, part.answer, `parts.${partIndex}.answer`);
                         } else if (typeof originalPart.answer === 'object' && originalPart.answer.hasOwnProperty('value')) {
-                            html += this.renderReadOnlyField('الإجابة (Answer - غير قابلة للترجمة)', originalPart.answer.value);
+                            // Allow editing if the translated part kept the same shape (object with value)
+                            html += renderField('الإجابة (Answer)', originalPart.answer.value, (part.answer && part.answer.value) || originalPart.answer.value, `parts.${partIndex}.answer.value`);
                         } else {
                              html += this.renderReadOnlyField('الإجابة (Answer - غير قابلة للترجمة)', JSON.stringify(originalPart.answer));
                         }
