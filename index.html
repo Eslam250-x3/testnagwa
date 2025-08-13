@@ -97,6 +97,17 @@
         .editable-preview-field table { width: 100%; border-collapse: collapse; direction: rtl; }
         .editable-preview-field th, .editable-preview-field td { border: 1px solid var(--card-border); padding: 6px 8px; vertical-align: top; }
         .editable-preview-field thead { background-color: color-mix(in srgb, var(--primary-color) 8%, var(--card-bg)); }
+        /* Make table cells editable */
+        .editable-preview-field td, .editable-preview-field th { 
+            position: relative; 
+            min-height: 1.5em; 
+            cursor: text; 
+        }
+        .editable-preview-field td:focus, .editable-preview-field th:focus { 
+            outline: 2px solid var(--primary-color); 
+            outline-offset: -2px; 
+            background-color: color-mix(in srgb, var(--primary-color) 5%, var(--input-bg)); 
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -693,7 +704,8 @@
                         /<math-field[\s\S]*?<\/math-field>/g,
                         /<audio[\s\S]*?<\/audio>/g,
                         /<img[^>]*>/g,
-                        /<table[\s\S]*?<\/table>/g,
+                        // Don't protect tables - let their content be translated
+                        // /<table[\s\S]*?<\/table>/g,
                         /_{3,}/g,
                         /```[\s\S]*?```/g,
                         /`[^`]*`/g,
@@ -1788,6 +1800,24 @@
                 if (htmlString.includes('__LOCK') || htmlString.includes('LexicalTheme')) {
                     console.log('Problematic content detected:', htmlString.substring(0, 200));
                 }
+                
+                // If content is just __LOCK__ placeholders, try to restore original content
+                if (htmlString.trim() === '__LOCK__' || htmlString.trim() === '__LOCK_I_LOCK__') {
+                    // Try to find the original content from the original data
+                    const fileIndex = parseInt(document.querySelector('.editable-preview-field')?.dataset.fileIndex || '0', 10);
+                    const path = document.querySelector('.editable-preview-field')?.dataset.path || '';
+                    if (fileIndex >= 0 && path && TranslatorApp.state.originalJsonData[fileIndex]) {
+                        const keys = path.split('.');
+                        let originalContent = TranslatorApp.state.originalJsonData[fileIndex].data;
+                        for (let i = 0; i < keys.length; i++) {
+                            originalContent = originalContent ? originalContent[keys[i]] : '';
+                        }
+                        if (originalContent && typeof originalContent === 'string') {
+                            htmlString = originalContent;
+                        }
+                    }
+                }
+                
                 // 1) Keep any pre-existing <math-field> as-is to avoid double-wrapping
                 htmlString = htmlString.replace(/<math-field[\s\S]*?<\/math-field>/gi, (m) => `__MATHFIELD__${btoa(unescape(encodeURIComponent(m)))}__`);
                 const latexRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
@@ -1880,6 +1910,11 @@
                     }
                 });
                 
+                // If content is empty or just whitespace, save as empty string instead of __LOCK__
+                if (!newContent.trim()) {
+                    newContent = '';
+                }
+                
                 this.updateData(fileIndex, path, newContent);
                 this.updateDiff(fileIndex, path);
                 const statusEl = document.getElementById(`status-field-${fileIndex}-${path.replace(/\./g, '-')}`);
@@ -1937,7 +1972,7 @@
                     </div>`;
             },
 
-            renderFileContent(data, fileIndex) {
+                        renderFileContent(data, fileIndex) {
                 let html = '<div class="space-y-6">';
                 const renderField = (label, originalValue, translatedValue, path) => {
                     if (originalValue === undefined || originalValue === null) return '';
@@ -1961,12 +1996,12 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--success-color);">المترجم (قابل للتعديل)</p>
-                                     <div id="${fieldId}" 
+                                    <div id="${fieldId}" 
                                          contenteditable="true"
                                          class="editable-preview-field"
                                          data-path="${path}"
                                          data-file-index="${fileIndex}">
-                                         ${this.renderContentWithMath(translatedValue)}
+                                         ${this.renderContentWithMath(translatedValue || originalValue)}
                                     </div>
                                 </div>
                             </div>
