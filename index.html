@@ -424,10 +424,11 @@
             this.dom.gradeSelect.addEventListener('change', this.subjects.onGradeChange.bind(this.subjects));
             this.dom.applyPromptBtn.addEventListener('click', this.subjects.apply.bind(this.subjects));
 
-            // Event delegation for MathLive field updates
+            // Event delegation for all preview field updates
             this.dom.previewContainer.addEventListener('input', (e) => {
-                if (e.target.tagName.toLowerCase() === 'math-field') {
-                    this.preview.handleMathFieldUpdate(e.target);
+                const fieldContainer = e.target.closest('.editable-preview-field');
+                if (fieldContainer) {
+                    this.preview.handlePreviewFieldUpdate(fieldContainer);
                 }
             });
         },
@@ -1687,8 +1688,7 @@
                 return `<p dir="rtl">${content}</p>`;
             },
             
-            handleMathFieldUpdate(mathFieldElement) {
-                const fieldContainer = mathFieldElement.closest('.editable-preview-field');
+            handlePreviewFieldUpdate(fieldContainer) {
                 if (!fieldContainer) return;
                 
                 const path = fieldContainer.dataset.path;
@@ -1786,6 +1786,7 @@
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--success-color);">المترجم (قابل للتعديل)</p>
                                     <div id="${fieldId}" 
+                                         contenteditable="true"
                                          class="editable-preview-field"
                                          data-path="${path}"
                                          data-file-index="${fileIndex}">
