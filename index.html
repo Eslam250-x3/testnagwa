@@ -980,7 +980,43 @@
                 
                 return Array.from(bag);
             },
-            escapeRegex(str) { return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
+            escapeRegex(str) { return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); },
+            /**
+             * دالة لتحليل نص HTML، استخراج النصوص القابلة للترجمة، وتوليد هيكل HTML مع نصوص نائبة.
+             * @param {string} htmlString - كود HTML المراد تحليله.
+             * @param {object} basePointer - معلومات لتحديد مصدر النص (رقم الملف، الجزء، إلخ).
+             * @returns {{jobs: Array, parsedBody: HTMLElement}} - كائن يحتوي على قائمة مهام الترجمة والهيكل.
+             */
+            parseHtmlAndCreateJobs(htmlString, basePointer) {
+                const jobs = [];
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(`<!DOCTYPE html><body>${htmlString}</body>`, 'text/html');
+                const body = doc.body;
+
+                function traverse(node) {
+                    if (!node) return;
+                    if (node.nodeType === 3) { // Text node
+                        const text = (node.nodeValue || '').trim();
+                        if (text) {
+                            jobs.push({
+                                type: 'text_node',
+                                originalText: text,
+                                pointer: { ...(basePointer || {}) },
+                                domNode: node
+                            });
+                        }
+                        return;
+                    }
+                    if (node.nodeType === 1) { // Element
+                        const tag = (node.tagName || '').toUpperCase();
+                        if (tag === 'SCRIPT' || tag === 'STYLE') return;
+                        for (const child of Array.from(node.childNodes || [])) traverse(child);
+                    }
+                }
+
+                traverse(body);
+                return { jobs, parsedBody: body };
+            }
         },
 
         remoteGlossary: {
@@ -1116,6 +1152,7 @@
                         /https?:\/\/\S+/g,
                         // Protect Lexical theme elements that might interfere with translation
                         /<span[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/span>/g,
+                        /<p[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/p>/g
                     ];
                     let protectedText = String(text || '');
                     for (const re of patterns) {
@@ -1907,24 +1944,25 @@
             }
         },
 
+        // استبدال الدالة بالكامل بالنسخة الجديدة (تحليل HTML وتوليد مهام لعُقد النص)
         async startTranslationProcess() {
             const apiProvider = document.querySelector('input[name="apiProvider"]:checked').value;
             let apiKeyOrUrl; let localModelName;
             
             try {
-            if (apiProvider === 'gemini') {
-                apiKeyOrUrl = this.dom.geminiKeyInput.value.trim();
+                if (apiProvider === 'gemini') {
+                    apiKeyOrUrl = this.dom.geminiKeyInput.value.trim();
                     if (!this.validation.validateApiKey(apiKeyOrUrl, 'gemini')) {
-                        return this.ui.showAlert(`مفتاح API لـ Gemini غير صالح. تأكد من أنه يبدأ بـ AIza ويحتوي على 30 حرف على الأقل.`, 'error');
+                        return this.ui.showAlert(`مفتاح API لـ Gemini غير صالح.`, 'error');
                     }
-            } else if (apiProvider === 'chatgpt') {
-                apiKeyOrUrl = this.dom.chatgptKeyInput.value.trim();
+                } else if (apiProvider === 'chatgpt') {
+                    apiKeyOrUrl = this.dom.chatgptKeyInput.value.trim();
                     if (!this.validation.validateApiKey(apiKeyOrUrl, 'chatgpt')) {
-                        return this.ui.showAlert(`مفتاح API لـ ChatGPT غير صالح. تأكد من أنه يبدأ بـ sk- ويحتوي على 20 حرف على الأقل.`, 'error');
+                        return this.ui.showAlert(`مفتاح API لـ ChatGPT غير صالح.`, 'error');
                     }
                 } else if (apiProvider === 'local') {
-                apiKeyOrUrl = this.dom.localModelUrl.value.trim();
-                localModelName = this.dom.localModelName.value.trim();
+                    apiKeyOrUrl = this.dom.localModelUrl.value.trim();
+                    localModelName = this.dom.localModelName.value.trim();
                     const validation = this.validation.validateLocalModelSettings(apiKeyOrUrl, localModelName);
                     if (!validation.valid) {
                         return this.ui.showAlert(validation.message, 'error');
@@ -1937,7 +1975,6 @@
                     return this.ui.showAlert('اختر ملف JSON واحد على الأقل.', 'error');
                 }
             } catch (validationError) {
-                console.error('Validation error:', validationError);
                 return this.ui.showAlert('خطأ في التحقق من صحة البيانات المدخلة.', 'error');
             }
 
@@ -1953,247 +1990,74 @@
                 await this.fileHandler.readFilesFromInput();
                 this.state.translatedJsonData = JSON.parse(JSON.stringify(this.state.originalJsonData));
 
-                this.ui.updateProgress('جاري تحضير المصطلحات المعتمدة...');
-                const allTexts = this.utils.collectAllTextsFromFiles(this.state.originalJsonData);
-                const subject = this.state.selectedSubject;
-                const grade = this.state.selectedGrade;
-                const ctx = { subject, grade };
+                const allJobs = [];
+                const parsedDataMap = new Map();
 
-                await this.remoteGlossary.fetchApproved(subject, allTexts);
-                if (this.dom.useGlossaryCheckbox.checked && this.state.glossary.length > 0) {
-                    const merged = { ...(this.remoteGlossary.map || {}) };
-                    this.state.glossary.forEach(e => { if (e.term && e.translation) merged[e.term] = e.translation; });
-                    this.remoteGlossary.map = merged;
-                }
-
-                this.ui.updateProgress('جاري تجميع النصوص للترجمة...');
-                const translationJobs = [];
-                const SEP = this.constants.CONTEXT_SEPARATOR;
-                const applyGlossary = (txt) => this.remoteGlossary.applyWithPlaceholders(txt);
+                this.ui.updateProgress('جاري تحليل المحتوى وتجهيز النصوص...');
 
                 this.state.originalJsonData.forEach((file, fileIndex) => {
-                    if (file.data.statement) {
-                        const src = file.data.statement;
-                        const prot = this.quality.protectSegments(src);
-                        const gl = applyGlossary(prot.protectedText);
-                        translationJobs.push({
-                            type: 'single',
-                            originalText: gl.modifiedText,
-                            placeholders: { locks: prot.placeholders, glossary: gl.placeholders },
-                            pointer: { fileIndex, key: 'statement' },
-                            sourceRaw: src,
-                            tmKey: this.tm.key(src, ctx)
-                        });
-                    }
+                    const processField = (htmlString, basePointer) => {
+                        if (!htmlString || typeof htmlString !== 'string') return;
+
+                        const { jobs, parsedBody } = this.utils.parseHtmlAndCreateJobs(htmlString, basePointer);
+                        allJobs.push(...jobs);
+
+                        const mapKey = JSON.stringify(basePointer);
+                        parsedDataMap.set(mapKey, parsedBody);
+                    };
+
+                    // معالجة البيان الرئيسي
+                    processField(file.data.statement, { fileIndex, key: 'statement' });
+
+                    // معالجة أجزاء السؤال
                     file.data.parts?.forEach((part, partIndex) => {
-                        // **IMPROVEMENT**: Handle gapText questions by translating the 'value' in 'gap_text_keys'
-                        if (part.type === 'gapText' && Array.isArray(part.gap_text_keys)) {
-                            part.gap_text_keys.forEach((keyItem, keyIndex) => {
-                                if (keyItem && typeof keyItem.value === 'string') {
-                                    const src = keyItem.value;
-                                    const prot = this.quality.protectSegments(src);
-                                    const gl = applyGlossary(prot.protectedText);
-                                    translationJobs.push({
-                                        type: 'single',
-                                        originalText: gl.modifiedText,
-                                        placeholders: { locks: prot.placeholders, glossary: gl.placeholders },
-                                        pointer: { fileIndex, partIndex, key: 'gap_text_keys', keyIndex: keyIndex },
-                                        sourceRaw: src,
-                                        tmKey: this.tm.key(src, ctx)
-                                    });
-                                }
-                            });
+                        processField(part.stem, { fileIndex, partIndex, key: 'stem' });
+                        if (typeof part.answer === 'string') {
+                            processField(part.answer, { fileIndex, partIndex, key: 'answer' });
                         }
-
-                        if (part.stem && part.choices && part.choices.length > 0) {
-                            const srcParts = [];
-                            const lockPlaceholders = [];
-                            const glossPlaceholders = [];
-                            const blockParts = [];
-
-                            const stemProt = this.quality.protectSegments(part.stem);
-                            const stemGl = applyGlossary(stemProt.protectedText);
-                            srcParts.push(part.stem);
-                            lockPlaceholders.push(stemProt.placeholders);
-                            glossPlaceholders.push(stemGl.placeholders);
-                            blockParts.push(stemGl.modifiedText);
-
-                            part.choices.forEach(choice => {
-                                const prot = this.quality.protectSegments(choice.html_content);
-                                const gl = applyGlossary(prot.protectedText);
-                                srcParts.push(choice.html_content);
-                                lockPlaceholders.push(prot.placeholders);
-                                glossPlaceholders.push(gl.placeholders);
-                                blockParts.push(gl.modifiedText);
-                            });
-
-                            translationJobs.push({
-                                type: 'block',
-                                originalText: blockParts.join(SEP),
-                                placeholders: { locks: lockPlaceholders, glossary: glossPlaceholders },
-                                pointer: { fileIndex, partIndex, numChoices: part.choices.length },
-                                sourceParts: srcParts,
-                                tmKey: this.tm.key(srcParts.join(SEP), ctx)
-                            });
-                        }
-
-                        if (part.stem && (!part.choices || part.choices.length === 0)) {
-                            const src = part.stem;
-                            const prot = this.quality.protectSegments(src);
-                            const gl = applyGlossary(prot.protectedText);
-                            translationJobs.push({
-                                type: 'single',
-                                originalText: gl.modifiedText,
-                                placeholders: { locks: prot.placeholders, glossary: gl.placeholders },
-                                pointer: { fileIndex, partIndex, key: 'stem' },
-                                sourceRaw: src,
-                                tmKey: this.tm.key(src, ctx)
-                            });
-                        }
-
-                        if (part.answer && typeof part.answer === 'string') {
-                            const src = part.answer;
-                            const prot = this.quality.protectSegments(src);
-                            const gl = applyGlossary(prot.protectedText);
-                            translationJobs.push({
-                                type: 'single',
-                                originalText: gl.modifiedText,
-                                placeholders: { locks: prot.placeholders, glossary: gl.placeholders },
-                                pointer: { fileIndex, partIndex, key: 'answer' },
-                                sourceRaw: src,
-                                tmKey: this.tm.key(src, ctx)
-                            });
-                        }
+                        part.choices?.forEach((choice, choiceIndex) => {
+                            processField(choice.html_content, { fileIndex, partIndex, choiceIndex, key: 'choice' });
+                        });
                     });
                 });
 
                 const uniqueJobs = [];
                 const seen = new Set();
-                for (const job of translationJobs) {
+                for (const job of allJobs) {
                     if (!seen.has(job.originalText)) {
                         seen.add(job.originalText);
                         uniqueJobs.push(job);
                     }
                 }
 
-                this.ui.updateProgress(`تحضير ${uniqueJobs.length} نص فريد...`);
-
-                const useTM = this.dom.useTmCheckbox.checked;
-                const jobsToTranslate = [];
                 if (uniqueJobs.length > 0) {
-                    uniqueJobs.forEach(job => {
-                        if (useTM) {
-                            const mem = this.tm.get(job.type === 'block' ? (job.sourceParts || []).join(SEP) : job.sourceRaw, ctx);
-                            if (mem) {
-                                this.state.translationCache.set(job.originalText, mem);
-                                return;
-                            }
-                        }
-                        jobsToTranslate.push(job);
-                    });
-                }
-
-                if (jobsToTranslate.length > 0) {
+                    this.ui.updateProgress(`جاري ترجمة ${uniqueJobs.length} نص فريد...`);
                     const systemPrompt = this.subjects.buildSystemPrompt();
-                    await this.api.translateInChunks(
-                        jobsToTranslate, apiKeyOrUrl, apiProvider, localModelName, systemPrompt
-                    );
+                    await this.api.translateInChunks(uniqueJobs, apiKeyOrUrl, apiProvider, localModelName, systemPrompt);
                 }
 
-                this.ui.updateProgress('جاري تحديث البيانات...');
-                const warnings = [];
-                const SEP_REGEX = this.constants.CONTEXT_SEPARATOR;
+                this.ui.updateProgress('جاري إعادة بناء المحتوى المترجم...');
 
-                for (const job of translationJobs) {
+                // تحديث عقد النص مباشرة
+                allJobs.forEach(job => {
                     const translatedText = this.state.translationCache.get(job.originalText);
-                    if (translatedText === undefined) continue;
-
-                    if (job.type === 'single') {
-                        let t1 = this.remoteGlossary.revertPlaceholders(translatedText, job.placeholders.glossary);
-                        t1 = this.quality.postProcess(t1, ctx);
-                        const final_text = this.quality.restoreSegments(t1, job.placeholders.locks);
-
-                        warnings.push(...this.quality.qa.checkNumbers(job.sourceRaw || '', final_text),
-                                      ...this.quality.qa.checkSeparator(final_text, SEP_REGEX),
-                                      ...this.quality.qa.checkHtmlBalance(final_text));
-
-                        const { fileIndex, partIndex, key, keyIndex } = job.pointer;
-                        if (key === 'statement') this.state.translatedJsonData[fileIndex].data.statement = final_text;
-                        else if (key === 'answer') this.state.translatedJsonData[fileIndex].data.parts[partIndex].answer = final_text;
-                        else if (key === 'stem') this.state.translatedJsonData[fileIndex].data.parts[partIndex].stem = final_text;
-                        else if (key === 'gap_text_keys') this.state.translatedJsonData[fileIndex].data.parts[partIndex].gap_text_keys[keyIndex].value = final_text;
-
-
-                        const srcKey = job.sourceRaw;
-                        if (useTM && srcKey) this.tm.put(srcKey, ctx, final_text);
-                    } else if (job.type === 'block') {
-                        const parts = translatedText.split(SEP_REGEX);
-                        const { fileIndex, partIndex, numChoices } = job.pointer;
-                        if (parts.length === numChoices + 1) {
-                            let stem = this.remoteGlossary.revertPlaceholders(parts[0], job.placeholders.glossary[0]);
-                            stem = this.quality.postProcess(stem, ctx);
-                            stem = this.quality.restoreSegments(stem, job.placeholders.locks[0]);
-                            this.state.translatedJsonData[fileIndex].data.parts[partIndex].stem = stem;
-                            warnings.push(...this.quality.qa.checkNumbers(job.sourceParts?.[0] || '', stem),
-                                          ...this.quality.qa.checkHtmlBalance(stem));
-                            for (let i = 0; i < numChoices; i++) {
-                                let ch = this.remoteGlossary.revertPlaceholders(parts[i + 1], job.placeholders.glossary[i + 1]);
-                                ch = this.quality.postProcess(ch, ctx);
-                                ch = this.quality.restoreSegments(ch, job.placeholders.locks[i + 1]);
-                                this.state.translatedJsonData[fileIndex].data.parts[partIndex].choices[i].html_content = ch;
-                                warnings.push(...this.quality.qa.checkNumbers(job.sourceParts?.[i + 1] || '', ch),
-                                              ...this.quality.qa.checkHtmlBalance(ch));
-                            }
-                            if (useTM) this.tm.put((job.sourceParts || []).join(SEP_REGEX), ctx, [stem, ...this.state.translatedJsonData[fileIndex].data.parts[partIndex].choices.map(c => c.html_content)].join(SEP_REGEX));
-                        } else {
-                            console.warn("Mismatch in translated block parts for file", fileIndex, "part", partIndex);
-                        }
+                    if (translatedText && job.domNode) {
+                        job.domNode.nodeValue = translatedText;
                     }
-                }
+                });
 
-                if (warnings.length) {
-                    const limited = warnings.slice(0, 8).join(' ');
-                    this.ui.showAlert(`مراجعات آلية: ${limited}${warnings.length > 8 ? ' ...' : ''}`, 'info', 6000);
-                }
+                // إعادة بناء JSON النهائي من هياكل HTML المحدثة
+                for (const [mapKey, parsedBody] of parsedDataMap.entries()) {
+                    const pointer = JSON.parse(mapKey);
+                    const finalHtml = parsedBody.innerHTML;
 
-                if (this.dom.useProofreadCheckbox.checked) {
-                    this.ui.updateProgress('بدء التدقيق اللغوي الآلي...');
-                    const items = [];
-                    const backMap = new Map();
-                    let pid = 0;
+                    const { fileIndex, partIndex, choiceIndex, key } = pointer;
+                    let target = this.state.translatedJsonData[fileIndex].data;
 
-                    const pushItem = (pointer, text) => {
-                        const prot = this.quality.protectSegments(text || '');
-                        items.push({ id: pid, text: prot.protectedText });
-                        backMap.set(pid, { pointer, locks: prot.placeholders });
-                        pid++;
-                    };
-
-                    this.state.translatedJsonData.forEach((file, fileIndex) => {
-                        const d = file.data;
-                        if (d.statement != null) pushItem({ fileIndex, key: 'statement' }, d.statement);
-                        d.parts?.forEach((p, partIndex) => {
-                            if (p.stem != null) pushItem({ fileIndex, partIndex, key: 'stem' }, p.stem);
-                            if (p.answer != null && typeof p.answer === 'string') pushItem({ fileIndex, partIndex, key: 'answer' }, p.answer);
-                            p.choices?.forEach((c, choiceIndex) => pushItem({ fileIndex, partIndex, choiceIndex, key: 'choice' }, c.html_content));
-                            p.gap_text_keys?.forEach((k, keyIndex) => pushItem({ fileIndex, partIndex, keyIndex, key: 'gap_text_key'}, k.value));
-                        });
-                    });
-
-                    const out = await this.api.proofreadInChunks(items, apiKeyOrUrl, apiProvider, localModelName);
-                    out.forEach(({ id, text }) => {
-                        const meta = backMap.get(id); if (!meta) return;
-                        let cleaned = this.quality.restoreSegments(text, meta.locks);
-                        cleaned = this.quality.normalizeArabicPunct(this.quality.enforceUnits(cleaned));
-                        const { fileIndex, partIndex, choiceIndex, keyIndex, key } = meta.pointer;
-                        if (key === 'statement') this.state.translatedJsonData[fileIndex].data.statement = cleaned;
-                        else if (key === 'stem') this.state.translatedJsonData[fileIndex].data.parts[partIndex].stem = cleaned;
-                        else if (key === 'answer') this.state.translatedJsonData[fileIndex].data.parts[partIndex].answer = cleaned;
-                        else if (key === 'choice') this.state.translatedJsonData[fileIndex].data.parts[partIndex].choices[choiceIndex].html_content = cleaned;
-                        else if (key === 'gap_text_key') this.state.translatedJsonData[fileIndex].data.parts[partIndex].gap_text_keys[keyIndex].value = cleaned;
-                    });
-
-                    this.ui.showAlert('تم التدقيق اللغوي الآلي بنجاح ✅', 'success', 4000);
+                    if (key === 'statement') target.statement = finalHtml;
+                    else if (key === 'stem') target.parts[partIndex].stem = finalHtml;
+                    else if (key === 'answer') target.parts[partIndex].answer = finalHtml;
+                    else if (key === 'choice') target.parts[partIndex].choices[choiceIndex].html_content = finalHtml;
                 }
 
                 this.state.activeScreen = 'preview';
@@ -2203,26 +2067,12 @@
                 this.preview.render();
                 const stats = this.statistics.calculate();
                 this.ui.renderStatistics(stats);
-                this.ui.showAlert('تمت الترجمة بنجاح بجودة احترافية ✅', 'success');
+                this.ui.showAlert('تمت الترجمة بنجاح بمنطق الفصل المتقدم ✅', 'success');
 
             } catch (error) {
                 if (error?.name !== 'AbortError') {
                     console.error('Translation process failed:', error);
-                    let errorMessage = 'فشل في عملية الترجمة.';
-                    
-                    if (error.message) {
-                        if (error.message.includes('API')) {
-                            errorMessage = 'خطأ في مفتاح API أو الخادم. تأكد من صحة المفتاح.';
-                        } else if (error.message.includes('CORS')) {
-                            errorMessage = 'خطأ في الوصول للخادم بسبب قيود الأمان.';
-                        } else if (error.message.includes('network')) {
-                            errorMessage = 'خطأ في الاتصال بالشبكة. تحقق من اتصالك بالإنترنت.';
-                        } else {
-                            errorMessage = error.message;
-                        }
-                    }
-                    
-                    this.ui.showAlert(errorMessage, 'error');
+                    this.ui.showAlert(error.message, 'error');
                     this.ui.showScreen('setup');
                 }
             } finally {
