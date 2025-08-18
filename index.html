@@ -1116,7 +1116,6 @@
                         /https?:\/\/\S+/g,
                         // Protect Lexical theme elements that might interfere with translation
                         /<span[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/span>/g,
-                        /<p[^>]*class="[^"]*LexicalTheme[^"]*"[^>]*>[\s\S]*?<\/p>/g
                     ];
                     let protectedText = String(text || '');
                     for (const re of patterns) {
