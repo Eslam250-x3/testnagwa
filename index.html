@@ -3874,5 +3874,52 @@
 
     document.addEventListener('DOMContentLoaded', () => TranslatorApp.init());
     </script>
+    <script>
+    // هذه الدالة تقوم بإنشاء زر تبديل اللغة وإضافته إلى لوحة المفاتيح
+    function addLanguageToggleButton() {
+        // ابحث عن لوحة المفاتيح في الصفحة
+        const keyboard = document.querySelector('.ML__keyboard');
+
+        // إذا لم تكن لوحة المفاتيح موجودة، أو كان الزر موجودًا بالفعل، لا تفعل شيئًا
+        if (!keyboard || keyboard.querySelector('.lang-toggle-btn')) {
+            return;
+        }
+
+        // قم بإنشاء عنصر الزر الجديد
+        const btn = document.createElement('button');
+
+        // النص الذي سيظهر على الزر
+        btn.textContent = 'عربي / EN';
+
+        // كلاس CSS لتمييز الزر
+        btn.className = 'lang-toggle-btn';
+
+        // تصميم بسيط للزر ليتناسب مع لوحة المفاتيح
+        btn.style.cssText = `
+            position: absolute;
+            top: 5px;
+            right: 170px; /* تم تعديل الموضع ليكون مناسبًا */
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #555;
+            color: white;
+            border: 1px solid #777;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 100;
+        `;
+
+        // عند النقر على الزر، قم بتنفيذ نفس الدالة التي كان الاختصار ينفذها
+        btn.onclick = () => TranslatorApp.utils.mathLive.toggleLanguage();
+
+        // أضف الزر الجديد إلى لوحة المفاتيح
+        keyboard.appendChild(btn);
+    }
+
+    // بما أن لوحة المفاتيح تظهر وتختفي، سنقوم بتشغيل الدالة بشكل دوري
+    // للتحقق من ظهورها وإضافة الزر كل نصف ثانية
+    setInterval(addLanguageToggleButton, 500);
+</script>
 </body>
 </html>
