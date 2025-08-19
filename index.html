@@ -93,7 +93,225 @@
         .LexicalTheme__image img { max-width: 100%; height: auto; }
         math-field:focus-within { background-color: color-mix(in srgb, var(--primary-color) 10%, var(--input-bg)); box-shadow: 0 0 0 2px var(--primary-color); outline: none; }
             /* Visual blank for underscores in preview (does not persist to JSON) */
-            .blank-slot { display: inline-block; min-width: 1.8em; border-bottom: 2px solid currentColor; vertical-align: baseline; line-height: 1.2; margin: 0 0.15em; }
+            .blank-slot { 
+                display: inline-block; 
+                min-width: 1.8em; 
+                border-bottom: 2px solid currentColor; 
+                vertical-align: baseline; 
+                line-height: 1.2; 
+                margin: 0 0.15em; 
+                background-color: rgba(0, 0, 0, 0.05);
+                border-radius: 2px;
+                padding: 1px 2px;
+            }
+            /* Ensure blanks are visible in both original and translated text */
+            .original-text-readonly .blank-slot,
+            .editable-preview-field .blank-slot {
+                border-bottom: 2px solid #666;
+                background-color: rgba(0, 0, 0, 0.08);
+            }
+            /* Make blanks more prominent in original text */
+            .original-text-readonly .blank-slot {
+                border-bottom: 3px solid #333;
+                background-color: rgba(0, 0, 0, 0.12);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            /* Ensure blanks are visible in read-only fields */
+            .p-3.rounded-lg.text-sm .blank-slot {
+                border-bottom: 2px solid #555;
+                background-color: rgba(0, 0, 0, 0.1);
+                min-width: 2em;
+            }
+            /* Make blanks more visible in different contexts */
+            .blank-slot {
+                position: relative;
+                cursor: default;
+            }
+            .blank-slot::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background-color: rgba(0, 0, 0, 0.2);
+            }
+            /* Add hover effect to make blanks more interactive */
+            .blank-slot:hover {
+                background-color: rgba(0, 0, 0, 0.15) !important;
+                border-bottom-color: #333 !important;
+            }
+            /* Ensure blanks are visible in dark mode */
+            @media (prefers-color-scheme: dark) {
+                .blank-slot {
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                    border-bottom-color: #ccc !important;
+                }
+                .blank-slot:hover {
+                    background-color: rgba(255, 255, 255, 0.2) !important;
+                    border-bottom-color: #fff !important;
+                }
+            }
+            /* Add tooltip to show blank length on hover */
+            .blank-slot[data-blank]:hover::before {
+                content: attr(data-blank);
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #333;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 12px;
+                white-space: nowrap;
+                z-index: 1000;
+                pointer-events: none;
+            }
+            /* Ensure tooltip is visible in dark mode */
+            @media (prefers-color-scheme: dark) {
+                .blank-slot[data-blank]:hover::before {
+                    background-color: #fff;
+                    color: #333;
+                }
+            }
+            /* Add animation for better visual feedback */
+            .blank-slot {
+                transition: all 0.2s ease-in-out;
+            }
+            .blank-slot:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            /* Ensure blanks are accessible */
+            .blank-slot[data-blank] {
+                aria-label: "فراغ: " attr(data-blank);
+            }
+            /* Add focus styles for keyboard navigation */
+            .blank-slot:focus {
+                outline: 2px solid var(--primary-color);
+                outline-offset: 2px;
+            }
+            /* Ensure blanks are visible in print */
+            @media print {
+                .blank-slot {
+                    border-bottom: 2px solid #000 !important;
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                }
+            }
+            /* Add support for high contrast mode */
+            @media (prefers-contrast: high) {
+                .blank-slot {
+                    border-bottom: 3px solid #000 !important;
+                    background-color: #fff !important;
+                }
+            }
+            /* Add support for reduced motion */
+            @media (prefers-reduced-motion: reduce) {
+                .blank-slot {
+                    transition: none !important;
+                }
+                .blank-slot:hover {
+                    transform: none !important;
+                }
+            }
+            /* Advanced text direction support for mixed content */
+            .text-mixed {
+                direction: auto;
+                text-align: start;
+                unicode-bidi: embed;
+            }
+            
+            /* Enhanced text direction for Arabic-English mixed content */
+            .rtl-auto {
+                direction: rtl;
+                text-align: right;
+                unicode-bidi: embed;
+            }
+            
+            .ltr-auto {
+                direction: ltr;
+                text-align: left;
+                unicode-bidi: embed;
+            }
+            
+            /* Support for inline mixed text */
+            .mixed-content {
+                direction: auto;
+                unicode-bidi: plaintext;
+            }
+            
+            /* Improved support for numbers in Arabic text */
+            .arabic-numerals {
+                font-family: 'Arial Unicode MS', Arial, sans-serif;
+                direction: ltr;
+                unicode-bidi: embed;
+                display: inline;
+            }
+            
+            .english-numerals {
+                font-family: Arial, sans-serif;
+                direction: ltr;
+                unicode-bidi: embed;
+                display: inline;
+            }
+            
+            /* Enhanced preview content direction */
+            .original-text-readonly,
+            .editable-preview-field {
+                direction: auto;
+                text-align: start;
+                unicode-bidi: plaintext;
+            }
+            
+            /* Special handling for mixed content in preview */
+            .content-root {
+                direction: rtl;
+                text-align: right;
+                unicode-bidi: bidi-override;
+            }
+            
+            .content-root * {
+                unicode-bidi: embed;
+            }
+            
+            /* Handle English phrases within Arabic text */
+            .english-phrase {
+                direction: ltr;
+                unicode-bidi: embed;
+                display: inline;
+            }
+            
+            /* Handle Arabic phrases within English text */
+            .arabic-phrase {
+                direction: rtl;
+                unicode-bidi: embed;
+                display: inline;
+            }
+            
+            /* Math and chemical formulas should always be LTR */
+            math-field,
+            .math-content,
+            .chemical-formula {
+                direction: ltr !important;
+                unicode-bidi: embed;
+                text-align: left;
+            }
+            
+            /* Improved blank slots for mixed content */
+            .blank-slot {
+                direction: inherit;
+                unicode-bidi: embed;
+            }
+            
+            /* Add support for large text */
+            @media (prefers-reduced-motion: reduce) {
+                .blank-slot {
+                    min-width: 2.5em;
+                    font-size: 1.1em;
+                }
+            }
         /* Tables inside editable preview */
         .editable-preview-field table { width: 100%; border-collapse: collapse; direction: rtl; }
         .editable-preview-field th, .editable-preview-field td { border: 1px solid var(--card-border); padding: 6px 8px; vertical-align: top; }
@@ -981,6 +1199,161 @@
                 return Array.from(bag);
             },
             escapeRegex(str) { return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); },
+
+            // Advanced text direction detection and processing
+            textDirection: {
+                // Detect if text is primarily Arabic
+                isArabic(text) {
+                    if (!text || typeof text !== 'string') return false;
+                    const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+                    return arabicRegex.test(text);
+                },
+
+                // Detect if text is primarily English/Latin
+                isLatin(text) {
+                    if (!text || typeof text !== 'string') return false;
+                    const latinRegex = /[a-zA-Z]/;
+                    return latinRegex.test(text);
+                },
+
+                // Detect if text contains numbers
+                hasNumbers(text) {
+                    if (!text || typeof text !== 'string') return false;
+                    return /[\d٠-٩]/.test(text);
+                },
+
+                // Detect if text is mixed (Arabic + Latin)
+                isMixed(text) {
+                    if (!text || typeof text !== 'string') return false;
+                    return this.isArabic(text) && this.isLatin(text);
+                },
+
+                // Get dominant text direction
+                getDominantDirection(text) {
+                    if (!text || typeof text !== 'string') return 'rtl';
+                    
+                    const arabicChars = (text.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g) || []).length;
+                    const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+                    
+                    if (arabicChars > latinChars) return 'rtl';
+                    if (latinChars > arabicChars) return 'ltr';
+                    return 'rtl'; // Default to RTL for Arabic interface
+                },
+
+                // Process mixed content and add appropriate markup
+                processMixedContent(text) {
+                    if (!text || typeof text !== 'string') return text;
+                    
+                    try {
+                        let processed = text;
+                        
+                        // Handle Arabic numerals (٠-٩)
+                        processed = processed.replace(/([\u06F0-\u06F9]+)/g, '<span class="arabic-numerals" dir="ltr">$1</span>');
+                        
+                        // Handle English numerals in Arabic context
+                        processed = processed.replace(/(\d+(?:\.\d+)?)/g, '<span class="english-numerals" dir="ltr">$1</span>');
+                        
+                        // Handle English words/phrases in Arabic text
+                        if (this.isArabic(text) && this.isLatin(text)) {
+                            processed = processed.replace(/([a-zA-Z][a-zA-Z0-9\s\-_]*[a-zA-Z0-9]|[a-zA-Z])/g, (match) => {
+                                // Don't wrap if it's already wrapped
+                                if (match.includes('<span')) return match;
+                                return `<span class="english-phrase" dir="ltr">${match}</span>`;
+                            });
+                        }
+                        
+                        return processed;
+                    } catch (error) {
+                        console.error('Process mixed content error:', error);
+                        return text;
+                    }
+                },
+
+                // Apply smart direction classes to element
+                applySmartDirection(element, text) {
+                    if (!element || !text) return;
+                    
+                    try {
+                        const direction = this.getDominantDirection(text);
+                        const isMixed = this.isMixed(text);
+                        
+                        // Remove existing direction classes
+                        element.classList.remove('rtl-auto', 'ltr-auto', 'text-mixed', 'mixed-content');
+                        
+                        if (isMixed) {
+                            element.classList.add('mixed-content');
+                            element.setAttribute('dir', 'auto');
+                        } else if (direction === 'rtl') {
+                            element.classList.add('rtl-auto');
+                            element.setAttribute('dir', 'rtl');
+                        } else {
+                            element.classList.add('ltr-auto');
+                            element.setAttribute('dir', 'ltr');
+                        }
+                        
+                        // Add unicode-bidi for better rendering
+                        if (isMixed) {
+                            element.style.unicodeBidi = 'plaintext';
+                        } else {
+                            element.style.unicodeBidi = 'embed';
+                        }
+                    } catch (error) {
+                        console.error('Apply smart direction error:', error);
+                    }
+                },
+
+                // Enhanced content processing for preview
+                enhancePreviewContent(htmlString) {
+                    if (!htmlString || typeof htmlString !== 'string') return htmlString;
+                    
+                    try {
+                        // Create a temporary container to work with DOM
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = htmlString;
+                        
+                        // Process all text nodes
+                        const walker = document.createTreeWalker(
+                            tempDiv,
+                            NodeFilter.SHOW_TEXT,
+                            null,
+                            false
+                        );
+                        
+                        const textNodes = [];
+                        let node;
+                        while (node = walker.nextNode()) {
+                            textNodes.push(node);
+                        }
+                        
+                        textNodes.forEach(textNode => {
+                            const text = textNode.textContent;
+                            if (text && text.trim()) {
+                                const processedText = this.processMixedContent(text);
+                                if (processedText !== text) {
+                                    const wrapper = document.createElement('span');
+                                    wrapper.innerHTML = processedText;
+                                    this.applySmartDirection(wrapper, text);
+                                    textNode.parentNode.replaceChild(wrapper, textNode);
+                                }
+                            }
+                        });
+                        
+                        // Apply direction to container elements
+                        const elements = tempDiv.querySelectorAll('p, div, span, h1, h2, h3, h4, h5, h6');
+                        elements.forEach(el => {
+                            const text = el.textContent;
+                            if (text && text.trim()) {
+                                this.applySmartDirection(el, text);
+                            }
+                        });
+                        
+                        return tempDiv.innerHTML;
+                    } catch (error) {
+                        console.error('Enhance preview content error:', error);
+                        return htmlString;
+                    }
+                }
+            },
             /**
              * دالة لتحليل نص HTML، استخراج النصوص القابلة للترجمة، وتوليد هيكل HTML مع نصوص نائبة.
              * @param {string} htmlString - كود HTML المراد تحليله.
@@ -1950,19 +2323,19 @@
             let apiKeyOrUrl; let localModelName;
             
             try {
-                if (apiProvider === 'gemini') {
-                    apiKeyOrUrl = this.dom.geminiKeyInput.value.trim();
+            if (apiProvider === 'gemini') {
+                apiKeyOrUrl = this.dom.geminiKeyInput.value.trim();
                     if (!this.validation.validateApiKey(apiKeyOrUrl, 'gemini')) {
                         return this.ui.showAlert(`مفتاح API لـ Gemini غير صالح.`, 'error');
                     }
-                } else if (apiProvider === 'chatgpt') {
-                    apiKeyOrUrl = this.dom.chatgptKeyInput.value.trim();
+            } else if (apiProvider === 'chatgpt') {
+                apiKeyOrUrl = this.dom.chatgptKeyInput.value.trim();
                     if (!this.validation.validateApiKey(apiKeyOrUrl, 'chatgpt')) {
                         return this.ui.showAlert(`مفتاح API لـ ChatGPT غير صالح.`, 'error');
                     }
                 } else if (apiProvider === 'local') {
-                    apiKeyOrUrl = this.dom.localModelUrl.value.trim();
-                    localModelName = this.dom.localModelName.value.trim();
+                apiKeyOrUrl = this.dom.localModelUrl.value.trim();
+                localModelName = this.dom.localModelName.value.trim();
                     const validation = this.validation.validateLocalModelSettings(apiKeyOrUrl, localModelName);
                     if (!validation.valid) {
                         return this.ui.showAlert(validation.message, 'error');
@@ -2369,7 +2742,7 @@
                     // Handle empty or null content
                     if (!htmlString || htmlString.trim() === '') {
                         return '<div class="content-root" dir="rtl">&nbsp;</div>';
-                    }
+                }
                 
                 // 1) Keep any pre-existing <math-field> as-is to avoid double-wrapping
                 htmlString = htmlString.replace(/<math-field[\s\S]*?<\/math-field>/gi, (m) => `__MATHFIELD__${btoa(unescape(encodeURIComponent(m)))}__`);
@@ -2404,7 +2777,20 @@
                 const restored = content.replace(/__MATHFIELD__([A-Za-z0-9+/=]+)__/g, (_, b64) => {
                     try { return decodeURIComponent(escape(atob(b64))); } catch { return ''; }
                 });
-                return `<div class="content-root" dir="rtl">${restored}</div>`;
+
+                // 3) Apply smart text direction processing
+                const enhancedContent = TranslatorApp.utils.textDirection.enhancePreviewContent(restored);
+                
+                // 4) Determine the main direction for the container
+                const textContent = restored.replace(/<[^>]*>/g, ' ').trim();
+                const containerDirection = TranslatorApp.utils.textDirection.getDominantDirection(textContent);
+                const isMixed = TranslatorApp.utils.textDirection.isMixed(textContent);
+                
+                // 5) Set appropriate attributes for the container
+                const dirAttr = isMixed ? 'auto' : containerDirection;
+                const bidiClass = isMixed ? 'mixed-content' : (containerDirection === 'rtl' ? 'rtl-auto' : 'ltr-auto');
+                
+                return `<div class="content-root ${bidiClass}" dir="${dirAttr}">${enhancedContent}</div>`;
                 } catch (error) {
                     console.error('Render content with math error:', error);
                     return '<div class="content-root" dir="rtl">فشل في عرض المحتوى</div>';
@@ -2452,14 +2838,104 @@
                 try {
                 if (!text || typeof text !== 'string') return text;
                 // Replace sequences of 3+ underscores with a visual blank slot
-                return text.replace(/_{3,}/g, (m) => `<span class="blank-slot" data-blank="${'_'.repeat(m.length)}"></span>`);
+                // Also handle other common blank patterns like [___], (___), etc.
+                let decorated = text;
+                
+                // Detect text direction for appropriate blank styling
+                const textDirection = TranslatorApp.utils.textDirection.getDominantDirection(text);
+                const isMixed = TranslatorApp.utils.textDirection.isMixed(text);
+                const directionClass = isMixed ? 'mixed-content' : (textDirection === 'rtl' ? 'rtl-auto' : 'ltr-auto');
+                
+                // Handle underscores: ___, ____, _____ etc.
+                decorated = decorated.replace(/_{3,}/g, (m) => `<span class="blank-slot ${directionClass}" data-blank="${'_'.repeat(m.length)}" dir="${isMixed ? 'auto' : textDirection}"></span>`);
+                
+                // Handle brackets with underscores: [___], (___), {___}
+                decorated = decorated.replace(/([\[\(\{])_{3,}([\]\)\}])/g, (m, open, close) => {
+                    const underscores = m.slice(1, -1);
+                    return `${open}<span class="blank-slot ${directionClass}" data-blank="${underscores}" dir="${isMixed ? 'auto' : textDirection}">${underscores}</span>${close}`;
+                });
+                
+                // Handle simple brackets with spaces: [   ], (   ), {   }
+                decorated = decorated.replace(/([\[\(\{])\s{3,}([\]\)\}])/g, (m, open, close) => {
+                    const spaces = m.slice(1, -1);
+                    return `${open}<span class="blank-slot ${directionClass}" data-blank="${spaces}" dir="${isMixed ? 'auto' : textDirection}">${spaces}</span>${close}`;
+                });
+                
+                // Handle other common blank patterns
+                // Handle question marks: ???, ???? etc.
+                decorated = decorated.replace(/\?{3,}/g, (m) => `<span class="blank-slot ${directionClass}" data-blank="${'?'.repeat(m.length)}" dir="${isMixed ? 'auto' : textDirection}">${m}</span>`);
+                
+                // Handle dashes: ---, ---- etc.
+                decorated = decorated.replace(/-{3,}/g, (m) => `<span class="blank-slot ${directionClass}" data-blank="${'-'.repeat(m.length)}" dir="${isMixed ? 'auto' : textDirection}">${m}</span>`);
+                
+                // Handle dots: ..., .... etc.
+                decorated = decorated.replace(/\.{3,}/g, (m) => `<span class="blank-slot ${directionClass}" data-blank="${'.'.repeat(m.length)}" dir="${isMixed ? 'auto' : textDirection}">${m}</span>`);
+                
+                // Handle HTML content with blanks (preserve HTML structure)
+                if (decorated.includes('<') && decorated.includes('>')) {
+                    // Create a temporary DOM element to process HTML content
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = decorated;
+                    
+                    // Process text nodes within HTML
+                    const walker = document.createTreeWalker(
+                        tempDiv,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    const textNodes = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        textNodes.push(node);
+                    }
+                    
+                    // Process each text node
+                    textNodes.forEach(textNode => {
+                        const originalText = textNode.textContent;
+                        let processedText = originalText;
+                        
+                        // Detect direction for this specific text node
+                        const nodeDirection = TranslatorApp.utils.textDirection.getDominantDirection(originalText);
+                        const nodeIsMixed = TranslatorApp.utils.textDirection.isMixed(originalText);
+                        const nodeDirectionClass = nodeIsMixed ? 'mixed-content' : (nodeDirection === 'rtl' ? 'rtl-auto' : 'ltr-auto');
+                        const nodeDir = nodeIsMixed ? 'auto' : nodeDirection;
+                        
+                        // Apply blank decoration to text content with proper direction
+                        processedText = processedText.replace(/_{3,}/g, (m) => `<span class="blank-slot ${nodeDirectionClass}" data-blank="${'_'.repeat(m.length)}" dir="${nodeDir}"></span>`);
+                        processedText = processedText.replace(/([\[\(\{])_{3,}([\]\)\}])/g, (m, open, close) => {
+                            const underscores = m.slice(1, -1);
+                            return `${open}<span class="blank-slot ${nodeDirectionClass}" data-blank="${underscores}" dir="${nodeDir}">${underscores}</span>${close}`;
+                        });
+                        processedText = processedText.replace(/([\[\(\{])\s{3,}([\]\)\}])/g, (m, open, close) => {
+                            const spaces = m.slice(1, -1);
+                            return `${open}<span class="blank-slot ${nodeDirectionClass}" data-blank="${spaces}" dir="${nodeDir}">${spaces}</span>${close}`;
+                        });
+                        processedText = processedText.replace(/\?{3,}/g, (m) => `<span class="blank-slot ${nodeDirectionClass}" data-blank="${'?'.repeat(m.length)}" dir="${nodeDir}">${m}</span>`);
+                        processedText = processedText.replace(/-{3,}/g, (m) => `<span class="blank-slot ${nodeDirectionClass}" data-blank="${'-'.repeat(m.length)}" dir="${nodeDir}">${m}</span>`);
+                        processedText = processedText.replace(/\.{3,}/g, (m) => `<span class="blank-slot ${nodeDirectionClass}" data-blank="${'.'.repeat(m.length)}" dir="${nodeDir}">${m}</span>`);
+                        
+                        if (processedText !== originalText) {
+                            const wrapper = document.createElement('span');
+                            wrapper.innerHTML = processedText;
+                            // Apply direction to the wrapper as well
+                            TranslatorApp.utils.textDirection.applySmartDirection(wrapper, originalText);
+                            textNode.parentNode.replaceChild(wrapper, textNode);
+                        }
+                    });
+                    
+                    decorated = tempDiv.innerHTML;
+                }
+                
+                return decorated;
                 } catch (error) {
                     console.error('Decorate blanks error:', error);
                     return text;
                 }
             },
             
-            handlePreviewFieldUpdate(fieldContainer) {
+                        handlePreviewFieldUpdate(fieldContainer) {
                 try {
                 if (!fieldContainer) return;
                 
@@ -2479,7 +2955,37 @@
                         // If span is a preview blank-slot, persist original underscores length
                         if (node.classList && node.classList.contains('blank-slot')) {
                             const raw = node.getAttribute('data-blank') || '___';
-                            newContent += raw;
+                            // Check if the blank is inside brackets
+                            const parent = node.parentNode;
+                            if (parent && parent.nodeType === Node.TEXT_NODE) {
+                                const parentText = parent.textContent;
+                                const nodeIndex = parentText.indexOf(node.textContent);
+                                if (nodeIndex > 0 && nodeIndex < parentText.length - 1) {
+                                    const before = parentText[nodeIndex - 1];
+                                    const after = parentText[nodeIndex + node.textContent.length];
+                                    if ((before === '[' && after === ']') || 
+                                        (before === '(' && after === ')') || 
+                                        (before === '{' && after === '}')) {
+                                        newContent += before + raw + after;
+                                    } else {
+                                        newContent += raw;
+                                    }
+                                } else {
+                                    newContent += raw;
+                                }
+                            } else {
+                                newContent += raw;
+                            }
+                        }
+                        // Handle direction-related spans (english-phrase, arabic-phrase, etc.)
+                        else if (node.classList && (
+                            node.classList.contains('english-phrase') || 
+                            node.classList.contains('arabic-phrase') ||
+                            node.classList.contains('english-numerals') ||
+                            node.classList.contains('arabic-numerals')
+                        )) {
+                            // Extract the actual text content, preserving the wrapped text
+                            newContent += node.textContent || node.innerHTML;
                         } else {
                             newContent += node.innerHTML;
                         }
@@ -2492,8 +2998,17 @@
                             newContent += `${delimiter}${node.value}${delimiter}`;
                         }
                     } else if (node.nodeType === Node.ELEMENT_NODE) {
-                        // Preserve any other HTML element (e.g., table, div)
-                        newContent += node.outerHTML;
+                        // For direction-related elements, extract clean text content
+                        if (node.classList && (
+                            node.classList.contains('mixed-content') ||
+                            node.classList.contains('rtl-auto') ||
+                            node.classList.contains('ltr-auto')
+                        )) {
+                            newContent += node.textContent;
+                        } else {
+                            // Preserve any other HTML element (e.g., table, div)
+                            newContent += node.outerHTML;
+                        }
                     } else if (node.nodeType === Node.TEXT_NODE) {
                         newContent += node.textContent;
                             }
@@ -2580,10 +3095,22 @@
                 if (value === undefined || value === null) return '';
                 // **IMPROVEMENT**: Handle arrays by joining them for display
                 const displayValue = Array.isArray(value) ? value.join(', ') : String(value);
+                // Apply blank decoration to read-only fields as well
+                const decoratedValue = this.decorateBlanks(displayValue);
+                
+                // Apply smart text direction processing
+                const enhancedValue = TranslatorApp.utils.textDirection.enhancePreviewContent(decoratedValue);
+                
+                // Determine direction for the content
+                const textDirection = TranslatorApp.utils.textDirection.getDominantDirection(displayValue);
+                const isMixed = TranslatorApp.utils.textDirection.isMixed(displayValue);
+                const dirAttr = isMixed ? 'auto' : textDirection;
+                const directionClass = isMixed ? 'mixed-content' : (textDirection === 'rtl' ? 'rtl-auto' : 'ltr-auto');
+                
                 return `
                     <div class="border rounded-lg p-4" style="border-color: var(--card-border);">
                             <h5 class="font-bold flex items-center mb-2">${TranslatorApp.security.sanitize(label)}</h5>
-                        <div class="p-3 rounded-lg text-sm" style="background-color: var(--bg-color); color: var(--secondary-text);">${TranslatorApp.security.sanitize(displayValue)}</div>
+                        <div class="p-3 rounded-lg text-sm ${directionClass}" dir="${dirAttr}" style="background-color: var(--bg-color); color: var(--secondary-text);">${enhancedValue}</div>
                     </div>`;
                 } catch (error) {
                     console.error('Render read only field error:', error);
@@ -2617,7 +3144,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--secondary-text);">الأصلي</p>
-                                    <div class="original-text-readonly p-3 rounded-lg text-sm h-full" style="background-color: var(--bg-color); overflow:auto;">${TranslatorApp.security.sanitize(originalValue)}</div>
+                                    <div class="original-text-readonly p-3 rounded-lg text-sm h-full" style="background-color: var(--bg-color); overflow:auto;">${this.renderContentWithMath(originalValue)}</div>
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold mb-1" style="color: var(--success-color);">المترجم (قابل للتعديل)</p>
